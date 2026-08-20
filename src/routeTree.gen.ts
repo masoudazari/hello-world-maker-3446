@@ -10,33 +10,167 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as CategoriesRouteImport } from './routes/categories'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as ProductsIndexRouteImport } from './routes/products.index'
+import { Route as ProductsSlugRouteImport } from './routes/products.$slug'
+import { Route as PurchaseRequestsIndexRouteImport } from './routes/purchase-requests.index'
+import { Route as PurchaseRequestsIdRouteImport } from './routes/purchase-requests.$id'
+import { Route as SuppliersIndexRouteImport } from './routes/suppliers.index'
+import { Route as SuppliersIdRouteImport } from './routes/suppliers.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategoriesRoute = CategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProductsIndexRoute = ProductsIndexRouteImport.update({
+  id: '/products/',
+  path: '/products/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProductsSlugRoute = ProductsSlugRouteImport.update({
+  id: '/products/$slug',
+  path: '/products/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PurchaseRequestsIndexRoute = PurchaseRequestsIndexRouteImport.update({
+  id: '/purchase-requests/',
+  path: '/purchase-requests/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PurchaseRequestsIdRoute = PurchaseRequestsIdRouteImport.update({
+  id: '/purchase-requests/$id',
+  path: '/purchase-requests/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SuppliersIndexRoute = SuppliersIndexRouteImport.update({
+  id: '/suppliers/',
+  path: '/suppliers/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SuppliersIdRoute = SuppliersIdRouteImport.update({
+  id: '/suppliers/$id',
+  path: '/suppliers/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/categories': typeof CategoriesRoute
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/products/$slug': typeof ProductsSlugRoute
+  '/purchase-requests/$id': typeof PurchaseRequestsIdRoute
+  '/suppliers/$id': typeof SuppliersIdRoute
+  '/products/': typeof ProductsIndexRoute
+  '/purchase-requests/': typeof PurchaseRequestsIndexRoute
+  '/suppliers/': typeof SuppliersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/categories': typeof CategoriesRoute
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/products/$slug': typeof ProductsSlugRoute
+  '/purchase-requests/$id': typeof PurchaseRequestsIdRoute
+  '/suppliers/$id': typeof SuppliersIdRoute
+  '/products': typeof ProductsIndexRoute
+  '/purchase-requests': typeof PurchaseRequestsIndexRoute
+  '/suppliers': typeof SuppliersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/categories': typeof CategoriesRoute
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/products/$slug': typeof ProductsSlugRoute
+  '/purchase-requests/$id': typeof PurchaseRequestsIdRoute
+  '/suppliers/$id': typeof SuppliersIdRoute
+  '/products/': typeof ProductsIndexRoute
+  '/purchase-requests/': typeof PurchaseRequestsIndexRoute
+  '/suppliers/': typeof SuppliersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/categories'
+    | '/login'
+    | '/register'
+    | '/products/$slug'
+    | '/purchase-requests/$id'
+    | '/suppliers/$id'
+    | '/products/'
+    | '/purchase-requests/'
+    | '/suppliers/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/about'
+    | '/categories'
+    | '/login'
+    | '/register'
+    | '/products/$slug'
+    | '/purchase-requests/$id'
+    | '/suppliers/$id'
+    | '/products'
+    | '/purchase-requests'
+    | '/suppliers'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/categories'
+    | '/login'
+    | '/register'
+    | '/products/$slug'
+    | '/purchase-requests/$id'
+    | '/suppliers/$id'
+    | '/products/'
+    | '/purchase-requests/'
+    | '/suppliers/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
+  CategoriesRoute: typeof CategoriesRoute
+  LoginRoute: typeof LoginRoute
+  RegisterRoute: typeof RegisterRoute
+  ProductsSlugRoute: typeof ProductsSlugRoute
+  PurchaseRequestsIdRoute: typeof PurchaseRequestsIdRoute
+  SuppliersIdRoute: typeof SuppliersIdRoute
+  ProductsIndexRoute: typeof ProductsIndexRoute
+  PurchaseRequestsIndexRoute: typeof PurchaseRequestsIndexRoute
+  SuppliersIndexRoute: typeof SuppliersIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +182,91 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/categories': {
+      id: '/categories'
+      path: '/categories'
+      fullPath: '/categories'
+      preLoaderRoute: typeof CategoriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/products/': {
+      id: '/products/'
+      path: '/products'
+      fullPath: '/products/'
+      preLoaderRoute: typeof ProductsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/products/$slug': {
+      id: '/products/$slug'
+      path: '/products/$slug'
+      fullPath: '/products/$slug'
+      preLoaderRoute: typeof ProductsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/purchase-requests/': {
+      id: '/purchase-requests/'
+      path: '/purchase-requests'
+      fullPath: '/purchase-requests/'
+      preLoaderRoute: typeof PurchaseRequestsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/purchase-requests/$id': {
+      id: '/purchase-requests/$id'
+      path: '/purchase-requests/$id'
+      fullPath: '/purchase-requests/$id'
+      preLoaderRoute: typeof PurchaseRequestsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/suppliers/': {
+      id: '/suppliers/'
+      path: '/suppliers'
+      fullPath: '/suppliers/'
+      preLoaderRoute: typeof SuppliersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/suppliers/$id': {
+      id: '/suppliers/$id'
+      path: '/suppliers/$id'
+      fullPath: '/suppliers/$id'
+      preLoaderRoute: typeof SuppliersIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
+  CategoriesRoute: CategoriesRoute,
+  LoginRoute: LoginRoute,
+  RegisterRoute: RegisterRoute,
+  ProductsSlugRoute: ProductsSlugRoute,
+  PurchaseRequestsIdRoute: PurchaseRequestsIdRoute,
+  SuppliersIdRoute: SuppliersIdRoute,
+  ProductsIndexRoute: ProductsIndexRoute,
+  PurchaseRequestsIndexRoute: PurchaseRequestsIndexRoute,
+  SuppliersIndexRoute: SuppliersIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
