@@ -207,3 +207,28 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async () =>
     },
   };
 });
+
+export const getPublicRequest = createServerFn({ method: "GET" })
+  .inputValidator((data: { id: string }) => data)
+  .handler(async ({ data }) => {
+    const { publicClient } = await import("./supabase-public.server");
+    const { data: row } = await publicClient()
+      .from("purchase_requests")
+      .select(
+        "id, product_name, quantity, unit, quality, delivery_city, required_date, timeframe, description, status, offers_count, created_at, expires_at, budget_min, budget_max, categories(name, slug)",
+      )
+      .eq("id", data.id)
+      .maybeSingle();
+    return row ?? null;
+  });
+
+export const listBrands = createServerFn({ method: "GET" }).handler(async () => {
+  const { publicClient } = await import("./supabase-public.server");
+  const { data } = await publicClient()
+    .from("products")
+    .select("brand")
+    .eq("status", "active")
+    .not("brand", "is", null)
+    .limit(1000);
+  return Array.from(new Set((data ?? []).map((r) => r.brand).filter(Boolean) as string[])).sort();
+});
