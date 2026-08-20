@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductsIndexRouteImport } from './routes/products.index'
 import { Route as ProductsSlugRouteImport } from './routes/products.$slug'
 import { Route as SuppliersIndexRouteImport } from './routes/suppliers.index'
+import { Route as SuppliersIdRouteImport } from './routes/suppliers.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -34,16 +35,23 @@ const SuppliersIndexRoute = SuppliersIndexRouteImport.update({
   path: '/suppliers/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SuppliersIdRoute = SuppliersIdRouteImport.update({
+  id: '/suppliers/$id',
+  path: '/suppliers/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/products/$slug': typeof ProductsSlugRoute
+  '/suppliers/$id': typeof SuppliersIdRoute
   '/products/': typeof ProductsIndexRoute
   '/suppliers/': typeof SuppliersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/products/$slug': typeof ProductsSlugRoute
+  '/suppliers/$id': typeof SuppliersIdRoute
   '/products': typeof ProductsIndexRoute
   '/suppliers': typeof SuppliersIndexRoute
 }
@@ -51,20 +59,29 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/products/$slug': typeof ProductsSlugRoute
+  '/suppliers/$id': typeof SuppliersIdRoute
   '/products/': typeof ProductsIndexRoute
   '/suppliers/': typeof SuppliersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/products/$slug' | '/products/' | '/suppliers/'
+  fullPaths:
+    '/' | '/products/$slug' | '/suppliers/$id' | '/products/' | '/suppliers/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/products/$slug' | '/products' | '/suppliers'
-  id: '__root__' | '/' | '/products/$slug' | '/products/' | '/suppliers/'
+  to: '/' | '/products/$slug' | '/suppliers/$id' | '/products' | '/suppliers'
+  id:
+    | '__root__'
+    | '/'
+    | '/products/$slug'
+    | '/suppliers/$id'
+    | '/products/'
+    | '/suppliers/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProductsSlugRoute: typeof ProductsSlugRoute
+  SuppliersIdRoute: typeof SuppliersIdRoute
   ProductsIndexRoute: typeof ProductsIndexRoute
   SuppliersIndexRoute: typeof SuppliersIndexRoute
 }
@@ -99,12 +116,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SuppliersIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/suppliers/$id': {
+      id: '/suppliers/$id'
+      path: '/suppliers/$id'
+      fullPath: '/suppliers/$id'
+      preLoaderRoute: typeof SuppliersIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProductsSlugRoute: ProductsSlugRoute,
+  SuppliersIdRoute: SuppliersIdRoute,
   ProductsIndexRoute: ProductsIndexRoute,
   SuppliersIndexRoute: SuppliersIndexRoute,
 }
