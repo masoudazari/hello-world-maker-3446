@@ -75,7 +75,7 @@ const facetsQuery = queryOptions({
 
 function ProductsPage() {
   const search = Route.useSearch();
-  const navigate = useNavigate({ from: "/products" });
+  const navigate = useNavigate({ from: "/products/" });
   const { data } = useSuspenseQuery(productsQuery(search));
   const { data: facets } = useSuspenseQuery(facetsQuery);
 
