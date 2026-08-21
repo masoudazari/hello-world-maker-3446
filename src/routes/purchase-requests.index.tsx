@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CITIES } from "@/lib/constants";
 import { faNumber } from "@/lib/format";
+import { cleanSearch } from "@/lib/search";
 
 type Search = { q?: string; city?: string; category?: string };
 const ALL = "__all__";
@@ -23,11 +24,12 @@ function requestsQuery(search: Search) {
 const categoriesQuery = queryOptions({ queryKey: ["categories"], queryFn: () => listCategories() });
 
 export const Route = createFileRoute("/purchase-requests/")({
-  validateSearch: (search: Record<string, unknown>): Search => ({
-    q: (search["q"] as string) || undefined,
-    city: (search["city"] as string) || undefined,
-    category: (search["category"] as string) || undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): Search =>
+    cleanSearch<Search>({
+      q: search["q"],
+      city: search["city"],
+      category: search["category"],
+    }),
   loaderDeps: ({ search }) => search,
   loader: ({ context, deps }) => {
     void context.queryClient.ensureQueryData(requestsQuery(deps));
@@ -46,10 +48,11 @@ export const Route = createFileRoute("/purchase-requests/")({
 
 function RequestsPage() {
   const search = Route.useSearch();
-  const navigate = useNavigate({ from: "/purchase-requests" });
+  const navigate = useNavigate({ from: "/purchase-requests/" });
   const { data } = useSuspenseQuery(requestsQuery(search));
   const { data: categories } = useSuspenseQuery(categoriesQuery);
-  const update = (patch: Partial<Search>) => navigate({ search: (prev) => ({ ...prev, ...patch }) });
+  const update = (patch: Partial<Search>) =>
+    void navigate({ search: ((prev: Search) => cleanSearch<Search>({ ...prev, ...patch })) as never });
 
   return (
     <PublicShell>
