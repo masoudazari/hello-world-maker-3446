@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BUSINESS_TYPES, CITIES } from "@/lib/constants";
 import { faNumber } from "@/lib/format";
+import { cleanSearch } from "@/lib/search";
 
 type Search = {
   q?: string;
@@ -30,7 +31,8 @@ type Search = {
 const ALL = "__all__";
 
 export const Route = createFileRoute("/products/")({
-  validateSearch: (search: Record<string, unknown>): Search => ({
+  validateSearch: (search: Record<string, unknown>): Search =>
+    cleanSearch<Search>({
     q: (search["q"] as string) || undefined,
     category: (search["category"] as string) || undefined,
     city: (search["city"] as string) || undefined,
@@ -42,7 +44,7 @@ export const Route = createFileRoute("/products/")({
     verifiedOnly: search["verifiedOnly"] === true || search["verifiedOnly"] === "true" || undefined,
     inStockOnly: search["inStockOnly"] === true || search["inStockOnly"] === "true" || undefined,
     page: search["page"] ? Number(search["page"]) : undefined,
-  }),
+    }),
   loaderDeps: ({ search }) => search,
   loader: ({ context, deps }) => {
     void context.queryClient.ensureQueryData(productsQuery(deps));
@@ -78,7 +80,9 @@ function ProductsPage() {
   const { data: facets } = useSuspenseQuery(facetsQuery);
 
   const update = (patch: Partial<Search>) =>
-    navigate({ search: (prev) => ({ ...prev, ...patch, page: patch.page ?? 1 }) });
+    void navigate({
+      search: ((prev: Search) => cleanSearch<Search>({ ...prev, ...patch, page: patch.page ?? 1 })) as never,
+    });
 
   const totalPages = Math.max(1, Math.ceil(data.total / data.perPage));
 
@@ -174,7 +178,7 @@ function ProductsPage() {
               فقط کالاهای موجود
             </label>
 
-            <Button variant="outline" className="w-full" onClick={() => navigate({ search: {} })}>
+            <Button variant="outline" className="w-full" onClick={() => void navigate({ search: {} as never })}>
               حذف فیلترها
             </Button>
           </div>
