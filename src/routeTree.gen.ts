@@ -25,6 +25,7 @@ import { Route as PurchaseRequestsIdRouteImport } from './routes/purchase-reques
 import { Route as SuppliersIndexRouteImport } from './routes/suppliers.index'
 import { Route as SuppliersIdRouteImport } from './routes/suppliers.$id'
 import { Route as AuthenticatedBuyerDashboardRouteImport } from './routes/_authenticated/buyer.dashboard'
+import { Route as AuthenticatedBuyerOrdersRouteImport } from './routes/_authenticated/buyer.orders'
 import { Route as AuthenticatedBuyerRequestsIndexRouteImport } from './routes/_authenticated/buyer.requests.index'
 import { Route as AuthenticatedBuyerRequestsIdRouteImport } from './routes/_authenticated/buyer.requests.$id'
 import { Route as AuthenticatedBuyerRequestsNewRouteImport } from './routes/_authenticated/buyer.requests.new'
@@ -109,6 +110,12 @@ const AuthenticatedBuyerDashboardRoute =
     path: '/buyer/dashboard',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedBuyerOrdersRoute =
+  AuthenticatedBuyerOrdersRouteImport.update({
+    id: '/buyer/orders',
+    path: '/buyer/orders',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedBuyerRequestsIndexRoute =
   AuthenticatedBuyerRequestsIndexRouteImport.update({
     id: '/buyer/requests/',
@@ -144,6 +151,7 @@ export interface FileRoutesByFullPath {
   '/purchase-requests/': typeof PurchaseRequestsIndexRoute
   '/suppliers/': typeof SuppliersIndexRoute
   '/buyer/dashboard': typeof AuthenticatedBuyerDashboardRoute
+  '/buyer/orders': typeof AuthenticatedBuyerOrdersRoute
   '/buyer/requests/$id': typeof AuthenticatedBuyerRequestsIdRoute
   '/buyer/requests/new': typeof AuthenticatedBuyerRequestsNewRoute
   '/buyer/requests/': typeof AuthenticatedBuyerRequestsIndexRoute
@@ -164,6 +172,7 @@ export interface FileRoutesByTo {
   '/purchase-requests': typeof PurchaseRequestsIndexRoute
   '/suppliers': typeof SuppliersIndexRoute
   '/buyer/dashboard': typeof AuthenticatedBuyerDashboardRoute
+  '/buyer/orders': typeof AuthenticatedBuyerOrdersRoute
   '/buyer/requests/$id': typeof AuthenticatedBuyerRequestsIdRoute
   '/buyer/requests/new': typeof AuthenticatedBuyerRequestsNewRoute
   '/buyer/requests': typeof AuthenticatedBuyerRequestsIndexRoute
@@ -186,6 +195,7 @@ export interface FileRoutesById {
   '/purchase-requests/': typeof PurchaseRequestsIndexRoute
   '/suppliers/': typeof SuppliersIndexRoute
   '/_authenticated/buyer/dashboard': typeof AuthenticatedBuyerDashboardRoute
+  '/_authenticated/buyer/orders': typeof AuthenticatedBuyerOrdersRoute
   '/_authenticated/buyer/requests/$id': typeof AuthenticatedBuyerRequestsIdRoute
   '/_authenticated/buyer/requests/new': typeof AuthenticatedBuyerRequestsNewRoute
   '/_authenticated/buyer/requests/': typeof AuthenticatedBuyerRequestsIndexRoute
@@ -208,6 +218,7 @@ export interface FileRouteTypes {
     | '/purchase-requests/'
     | '/suppliers/'
     | '/buyer/dashboard'
+    | '/buyer/orders'
     | '/buyer/requests/$id'
     | '/buyer/requests/new'
     | '/buyer/requests/'
@@ -228,6 +239,7 @@ export interface FileRouteTypes {
     | '/purchase-requests'
     | '/suppliers'
     | '/buyer/dashboard'
+    | '/buyer/orders'
     | '/buyer/requests/$id'
     | '/buyer/requests/new'
     | '/buyer/requests'
@@ -249,6 +261,7 @@ export interface FileRouteTypes {
     | '/purchase-requests/'
     | '/suppliers/'
     | '/_authenticated/buyer/dashboard'
+    | '/_authenticated/buyer/orders'
     | '/_authenticated/buyer/requests/$id'
     | '/_authenticated/buyer/requests/new'
     | '/_authenticated/buyer/requests/'
@@ -386,6 +399,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBuyerDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/buyer/orders': {
+      id: '/_authenticated/buyer/orders'
+      path: '/buyer/orders'
+      fullPath: '/buyer/orders'
+      preLoaderRoute: typeof AuthenticatedBuyerOrdersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/buyer/requests/': {
       id: '/_authenticated/buyer/requests/'
       path: '/buyer/requests'
@@ -412,6 +432,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedBuyerDashboardRoute: typeof AuthenticatedBuyerDashboardRoute
+  AuthenticatedBuyerOrdersRoute: typeof AuthenticatedBuyerOrdersRoute
   AuthenticatedBuyerRequestsIdRoute: typeof AuthenticatedBuyerRequestsIdRoute
   AuthenticatedBuyerRequestsNewRoute: typeof AuthenticatedBuyerRequestsNewRoute
   AuthenticatedBuyerRequestsIndexRoute: typeof AuthenticatedBuyerRequestsIndexRoute
@@ -419,6 +440,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedBuyerDashboardRoute: AuthenticatedBuyerDashboardRoute,
+  AuthenticatedBuyerOrdersRoute: AuthenticatedBuyerOrdersRoute,
   AuthenticatedBuyerRequestsIdRoute: AuthenticatedBuyerRequestsIdRoute,
   AuthenticatedBuyerRequestsNewRoute: AuthenticatedBuyerRequestsNewRoute,
   AuthenticatedBuyerRequestsIndexRoute: AuthenticatedBuyerRequestsIndexRoute,
