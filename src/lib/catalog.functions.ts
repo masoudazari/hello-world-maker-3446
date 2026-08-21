@@ -215,7 +215,7 @@ export const getPublicRequest = createServerFn({ method: "GET" })
     const { data: row } = await publicClient()
       .from("purchase_requests")
       .select(
-        "id, product_name, quantity, unit, quality, delivery_city, required_date, timeframe, description, status, offers_count, created_at, expires_at, budget_min, budget_max, categories(name, slug)",
+        "id, product_name, quantity, unit, quality, delivery_city, required_date, description, status, offers_count, created_at, expires_at, min_price, max_price, categories(name, slug)",
       )
       .eq("id", data.id)
       .maybeSingle();
