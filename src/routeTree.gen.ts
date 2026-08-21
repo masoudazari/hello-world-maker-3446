@@ -28,6 +28,7 @@ import { Route as AuthenticatedBuyerDashboardRouteImport } from './routes/_authe
 import { Route as AuthenticatedBuyerOrdersRouteImport } from './routes/_authenticated/buyer.orders'
 import { Route as AuthenticatedSupplierDashboardRouteImport } from './routes/_authenticated/supplier.dashboard'
 import { Route as AuthenticatedSupplierOffersRouteImport } from './routes/_authenticated/supplier.offers'
+import { Route as AuthenticatedSupplierProductsRouteImport } from './routes/_authenticated/supplier.products'
 import { Route as AuthenticatedSupplierRequestsRouteImport } from './routes/_authenticated/supplier.requests'
 import { Route as AuthenticatedBuyerRequestsIndexRouteImport } from './routes/_authenticated/buyer.requests.index'
 import { Route as AuthenticatedBuyerRequestsIdRouteImport } from './routes/_authenticated/buyer.requests.$id'
@@ -131,6 +132,12 @@ const AuthenticatedSupplierOffersRoute =
     path: '/supplier/offers',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedSupplierProductsRoute =
+  AuthenticatedSupplierProductsRouteImport.update({
+    id: '/supplier/products',
+    path: '/supplier/products',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedSupplierRequestsRoute =
   AuthenticatedSupplierRequestsRouteImport.update({
     id: '/supplier/requests',
@@ -175,6 +182,7 @@ export interface FileRoutesByFullPath {
   '/buyer/orders': typeof AuthenticatedBuyerOrdersRoute
   '/supplier/dashboard': typeof AuthenticatedSupplierDashboardRoute
   '/supplier/offers': typeof AuthenticatedSupplierOffersRoute
+  '/supplier/products': typeof AuthenticatedSupplierProductsRoute
   '/supplier/requests': typeof AuthenticatedSupplierRequestsRoute
   '/buyer/requests/$id': typeof AuthenticatedBuyerRequestsIdRoute
   '/buyer/requests/new': typeof AuthenticatedBuyerRequestsNewRoute
@@ -199,6 +207,7 @@ export interface FileRoutesByTo {
   '/buyer/orders': typeof AuthenticatedBuyerOrdersRoute
   '/supplier/dashboard': typeof AuthenticatedSupplierDashboardRoute
   '/supplier/offers': typeof AuthenticatedSupplierOffersRoute
+  '/supplier/products': typeof AuthenticatedSupplierProductsRoute
   '/supplier/requests': typeof AuthenticatedSupplierRequestsRoute
   '/buyer/requests/$id': typeof AuthenticatedBuyerRequestsIdRoute
   '/buyer/requests/new': typeof AuthenticatedBuyerRequestsNewRoute
@@ -225,6 +234,7 @@ export interface FileRoutesById {
   '/_authenticated/buyer/orders': typeof AuthenticatedBuyerOrdersRoute
   '/_authenticated/supplier/dashboard': typeof AuthenticatedSupplierDashboardRoute
   '/_authenticated/supplier/offers': typeof AuthenticatedSupplierOffersRoute
+  '/_authenticated/supplier/products': typeof AuthenticatedSupplierProductsRoute
   '/_authenticated/supplier/requests': typeof AuthenticatedSupplierRequestsRoute
   '/_authenticated/buyer/requests/$id': typeof AuthenticatedBuyerRequestsIdRoute
   '/_authenticated/buyer/requests/new': typeof AuthenticatedBuyerRequestsNewRoute
@@ -251,6 +261,7 @@ export interface FileRouteTypes {
     | '/buyer/orders'
     | '/supplier/dashboard'
     | '/supplier/offers'
+    | '/supplier/products'
     | '/supplier/requests'
     | '/buyer/requests/$id'
     | '/buyer/requests/new'
@@ -275,6 +286,7 @@ export interface FileRouteTypes {
     | '/buyer/orders'
     | '/supplier/dashboard'
     | '/supplier/offers'
+    | '/supplier/products'
     | '/supplier/requests'
     | '/buyer/requests/$id'
     | '/buyer/requests/new'
@@ -300,6 +312,7 @@ export interface FileRouteTypes {
     | '/_authenticated/buyer/orders'
     | '/_authenticated/supplier/dashboard'
     | '/_authenticated/supplier/offers'
+    | '/_authenticated/supplier/products'
     | '/_authenticated/supplier/requests'
     | '/_authenticated/buyer/requests/$id'
     | '/_authenticated/buyer/requests/new'
@@ -459,6 +472,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSupplierOffersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/supplier/products': {
+      id: '/_authenticated/supplier/products'
+      path: '/supplier/products'
+      fullPath: '/supplier/products'
+      preLoaderRoute: typeof AuthenticatedSupplierProductsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/supplier/requests': {
       id: '/_authenticated/supplier/requests'
       path: '/supplier/requests'
@@ -495,6 +515,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedBuyerOrdersRoute: typeof AuthenticatedBuyerOrdersRoute
   AuthenticatedSupplierDashboardRoute: typeof AuthenticatedSupplierDashboardRoute
   AuthenticatedSupplierOffersRoute: typeof AuthenticatedSupplierOffersRoute
+  AuthenticatedSupplierProductsRoute: typeof AuthenticatedSupplierProductsRoute
   AuthenticatedSupplierRequestsRoute: typeof AuthenticatedSupplierRequestsRoute
   AuthenticatedBuyerRequestsIdRoute: typeof AuthenticatedBuyerRequestsIdRoute
   AuthenticatedBuyerRequestsNewRoute: typeof AuthenticatedBuyerRequestsNewRoute
@@ -506,6 +527,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedBuyerOrdersRoute: AuthenticatedBuyerOrdersRoute,
   AuthenticatedSupplierDashboardRoute: AuthenticatedSupplierDashboardRoute,
   AuthenticatedSupplierOffersRoute: AuthenticatedSupplierOffersRoute,
+  AuthenticatedSupplierProductsRoute: AuthenticatedSupplierProductsRoute,
   AuthenticatedSupplierRequestsRoute: AuthenticatedSupplierRequestsRoute,
   AuthenticatedBuyerRequestsIdRoute: AuthenticatedBuyerRequestsIdRoute,
   AuthenticatedBuyerRequestsNewRoute: AuthenticatedBuyerRequestsNewRoute,
