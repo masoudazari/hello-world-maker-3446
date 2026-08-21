@@ -10,20 +10,38 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as CategoriesRouteImport } from './routes/categories'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as ProductsIndexRouteImport } from './routes/products.index'
 import { Route as ProductsSlugRouteImport } from './routes/products.$slug'
 import { Route as PurchaseRequestsIndexRouteImport } from './routes/purchase-requests.index'
 import { Route as PurchaseRequestsIdRouteImport } from './routes/purchase-requests.$id'
 import { Route as SuppliersIndexRouteImport } from './routes/suppliers.index'
 import { Route as SuppliersIdRouteImport } from './routes/suppliers.$id'
+import { Route as AuthenticatedBuyerDashboardRouteImport } from './routes/_authenticated/buyer.dashboard'
+import { Route as AuthenticatedBuyerOrdersRouteImport } from './routes/_authenticated/buyer.orders'
+import { Route as AuthenticatedSupplierDashboardRouteImport } from './routes/_authenticated/supplier.dashboard'
+import { Route as AuthenticatedSupplierOffersRouteImport } from './routes/_authenticated/supplier.offers'
+import { Route as AuthenticatedSupplierProductsRouteImport } from './routes/_authenticated/supplier.products'
+import { Route as AuthenticatedSupplierProfileRouteImport } from './routes/_authenticated/supplier.profile'
+import { Route as AuthenticatedSupplierRequestsRouteImport } from './routes/_authenticated/supplier.requests'
+import { Route as AuthenticatedBuyerRequestsIndexRouteImport } from './routes/_authenticated/buyer.requests.index'
+import { Route as AuthenticatedBuyerRequestsIdRouteImport } from './routes/_authenticated/buyer.requests.$id'
+import { Route as AuthenticatedBuyerRequestsNewRouteImport } from './routes/_authenticated/buyer.requests.new'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -36,14 +54,29 @@ const CategoriesRoute = CategoriesRouteImport.update({
   path: '/categories',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProductsIndexRoute = ProductsIndexRouteImport.update({
@@ -76,46 +109,146 @@ const SuppliersIdRoute = SuppliersIdRouteImport.update({
   path: '/suppliers/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedBuyerDashboardRoute =
+  AuthenticatedBuyerDashboardRouteImport.update({
+    id: '/buyer/dashboard',
+    path: '/buyer/dashboard',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedBuyerOrdersRoute =
+  AuthenticatedBuyerOrdersRouteImport.update({
+    id: '/buyer/orders',
+    path: '/buyer/orders',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedSupplierDashboardRoute =
+  AuthenticatedSupplierDashboardRouteImport.update({
+    id: '/supplier/dashboard',
+    path: '/supplier/dashboard',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedSupplierOffersRoute =
+  AuthenticatedSupplierOffersRouteImport.update({
+    id: '/supplier/offers',
+    path: '/supplier/offers',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedSupplierProductsRoute =
+  AuthenticatedSupplierProductsRouteImport.update({
+    id: '/supplier/products',
+    path: '/supplier/products',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedSupplierProfileRoute =
+  AuthenticatedSupplierProfileRouteImport.update({
+    id: '/supplier/profile',
+    path: '/supplier/profile',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedSupplierRequestsRoute =
+  AuthenticatedSupplierRequestsRouteImport.update({
+    id: '/supplier/requests',
+    path: '/supplier/requests',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedBuyerRequestsIndexRoute =
+  AuthenticatedBuyerRequestsIndexRouteImport.update({
+    id: '/buyer/requests/',
+    path: '/buyer/requests/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedBuyerRequestsIdRoute =
+  AuthenticatedBuyerRequestsIdRouteImport.update({
+    id: '/buyer/requests/$id',
+    path: '/buyer/requests/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedBuyerRequestsNewRoute =
+  AuthenticatedBuyerRequestsNewRouteImport.update({
+    id: '/buyer/requests/new',
+    path: '/buyer/requests/new',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/categories': typeof CategoriesRoute
+  '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
+  '/terms': typeof TermsRoute
   '/products/$slug': typeof ProductsSlugRoute
   '/purchase-requests/$id': typeof PurchaseRequestsIdRoute
   '/suppliers/$id': typeof SuppliersIdRoute
   '/products/': typeof ProductsIndexRoute
   '/purchase-requests/': typeof PurchaseRequestsIndexRoute
   '/suppliers/': typeof SuppliersIndexRoute
+  '/buyer/dashboard': typeof AuthenticatedBuyerDashboardRoute
+  '/buyer/orders': typeof AuthenticatedBuyerOrdersRoute
+  '/supplier/dashboard': typeof AuthenticatedSupplierDashboardRoute
+  '/supplier/offers': typeof AuthenticatedSupplierOffersRoute
+  '/supplier/products': typeof AuthenticatedSupplierProductsRoute
+  '/supplier/profile': typeof AuthenticatedSupplierProfileRoute
+  '/supplier/requests': typeof AuthenticatedSupplierRequestsRoute
+  '/buyer/requests/$id': typeof AuthenticatedBuyerRequestsIdRoute
+  '/buyer/requests/new': typeof AuthenticatedBuyerRequestsNewRoute
+  '/buyer/requests/': typeof AuthenticatedBuyerRequestsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/categories': typeof CategoriesRoute
+  '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
+  '/terms': typeof TermsRoute
   '/products/$slug': typeof ProductsSlugRoute
   '/purchase-requests/$id': typeof PurchaseRequestsIdRoute
   '/suppliers/$id': typeof SuppliersIdRoute
   '/products': typeof ProductsIndexRoute
   '/purchase-requests': typeof PurchaseRequestsIndexRoute
   '/suppliers': typeof SuppliersIndexRoute
+  '/buyer/dashboard': typeof AuthenticatedBuyerDashboardRoute
+  '/buyer/orders': typeof AuthenticatedBuyerOrdersRoute
+  '/supplier/dashboard': typeof AuthenticatedSupplierDashboardRoute
+  '/supplier/offers': typeof AuthenticatedSupplierOffersRoute
+  '/supplier/products': typeof AuthenticatedSupplierProductsRoute
+  '/supplier/profile': typeof AuthenticatedSupplierProfileRoute
+  '/supplier/requests': typeof AuthenticatedSupplierRequestsRoute
+  '/buyer/requests/$id': typeof AuthenticatedBuyerRequestsIdRoute
+  '/buyer/requests/new': typeof AuthenticatedBuyerRequestsNewRoute
+  '/buyer/requests': typeof AuthenticatedBuyerRequestsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/categories': typeof CategoriesRoute
+  '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
+  '/terms': typeof TermsRoute
   '/products/$slug': typeof ProductsSlugRoute
   '/purchase-requests/$id': typeof PurchaseRequestsIdRoute
   '/suppliers/$id': typeof SuppliersIdRoute
   '/products/': typeof ProductsIndexRoute
   '/purchase-requests/': typeof PurchaseRequestsIndexRoute
   '/suppliers/': typeof SuppliersIndexRoute
+  '/_authenticated/buyer/dashboard': typeof AuthenticatedBuyerDashboardRoute
+  '/_authenticated/buyer/orders': typeof AuthenticatedBuyerOrdersRoute
+  '/_authenticated/supplier/dashboard': typeof AuthenticatedSupplierDashboardRoute
+  '/_authenticated/supplier/offers': typeof AuthenticatedSupplierOffersRoute
+  '/_authenticated/supplier/products': typeof AuthenticatedSupplierProductsRoute
+  '/_authenticated/supplier/profile': typeof AuthenticatedSupplierProfileRoute
+  '/_authenticated/supplier/requests': typeof AuthenticatedSupplierRequestsRoute
+  '/_authenticated/buyer/requests/$id': typeof AuthenticatedBuyerRequestsIdRoute
+  '/_authenticated/buyer/requests/new': typeof AuthenticatedBuyerRequestsNewRoute
+  '/_authenticated/buyer/requests/': typeof AuthenticatedBuyerRequestsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -123,48 +256,92 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/categories'
+    | '/contact'
     | '/login'
+    | '/privacy'
     | '/register'
+    | '/terms'
     | '/products/$slug'
     | '/purchase-requests/$id'
     | '/suppliers/$id'
     | '/products/'
     | '/purchase-requests/'
     | '/suppliers/'
+    | '/buyer/dashboard'
+    | '/buyer/orders'
+    | '/supplier/dashboard'
+    | '/supplier/offers'
+    | '/supplier/products'
+    | '/supplier/profile'
+    | '/supplier/requests'
+    | '/buyer/requests/$id'
+    | '/buyer/requests/new'
+    | '/buyer/requests/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
     | '/categories'
+    | '/contact'
     | '/login'
+    | '/privacy'
     | '/register'
+    | '/terms'
     | '/products/$slug'
     | '/purchase-requests/$id'
     | '/suppliers/$id'
     | '/products'
     | '/purchase-requests'
     | '/suppliers'
+    | '/buyer/dashboard'
+    | '/buyer/orders'
+    | '/supplier/dashboard'
+    | '/supplier/offers'
+    | '/supplier/products'
+    | '/supplier/profile'
+    | '/supplier/requests'
+    | '/buyer/requests/$id'
+    | '/buyer/requests/new'
+    | '/buyer/requests'
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
     | '/about'
     | '/categories'
+    | '/contact'
     | '/login'
+    | '/privacy'
     | '/register'
+    | '/terms'
     | '/products/$slug'
     | '/purchase-requests/$id'
     | '/suppliers/$id'
     | '/products/'
     | '/purchase-requests/'
     | '/suppliers/'
+    | '/_authenticated/buyer/dashboard'
+    | '/_authenticated/buyer/orders'
+    | '/_authenticated/supplier/dashboard'
+    | '/_authenticated/supplier/offers'
+    | '/_authenticated/supplier/products'
+    | '/_authenticated/supplier/profile'
+    | '/_authenticated/supplier/requests'
+    | '/_authenticated/buyer/requests/$id'
+    | '/_authenticated/buyer/requests/new'
+    | '/_authenticated/buyer/requests/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
   CategoriesRoute: typeof CategoriesRoute
+  ContactRoute: typeof ContactRoute
   LoginRoute: typeof LoginRoute
+  PrivacyRoute: typeof PrivacyRoute
   RegisterRoute: typeof RegisterRoute
+  TermsRoute: typeof TermsRoute
   ProductsSlugRoute: typeof ProductsSlugRoute
   PurchaseRequestsIdRoute: typeof PurchaseRequestsIdRoute
   SuppliersIdRoute: typeof SuppliersIdRoute
@@ -182,6 +359,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -196,6 +380,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategoriesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -203,11 +394,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/register': {
       id: '/register'
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/products/': {
@@ -252,15 +457,118 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SuppliersIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/buyer/dashboard': {
+      id: '/_authenticated/buyer/dashboard'
+      path: '/buyer/dashboard'
+      fullPath: '/buyer/dashboard'
+      preLoaderRoute: typeof AuthenticatedBuyerDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/buyer/orders': {
+      id: '/_authenticated/buyer/orders'
+      path: '/buyer/orders'
+      fullPath: '/buyer/orders'
+      preLoaderRoute: typeof AuthenticatedBuyerOrdersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/supplier/dashboard': {
+      id: '/_authenticated/supplier/dashboard'
+      path: '/supplier/dashboard'
+      fullPath: '/supplier/dashboard'
+      preLoaderRoute: typeof AuthenticatedSupplierDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/supplier/offers': {
+      id: '/_authenticated/supplier/offers'
+      path: '/supplier/offers'
+      fullPath: '/supplier/offers'
+      preLoaderRoute: typeof AuthenticatedSupplierOffersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/supplier/products': {
+      id: '/_authenticated/supplier/products'
+      path: '/supplier/products'
+      fullPath: '/supplier/products'
+      preLoaderRoute: typeof AuthenticatedSupplierProductsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/supplier/profile': {
+      id: '/_authenticated/supplier/profile'
+      path: '/supplier/profile'
+      fullPath: '/supplier/profile'
+      preLoaderRoute: typeof AuthenticatedSupplierProfileRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/supplier/requests': {
+      id: '/_authenticated/supplier/requests'
+      path: '/supplier/requests'
+      fullPath: '/supplier/requests'
+      preLoaderRoute: typeof AuthenticatedSupplierRequestsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/buyer/requests/': {
+      id: '/_authenticated/buyer/requests/'
+      path: '/buyer/requests'
+      fullPath: '/buyer/requests/'
+      preLoaderRoute: typeof AuthenticatedBuyerRequestsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/buyer/requests/$id': {
+      id: '/_authenticated/buyer/requests/$id'
+      path: '/buyer/requests/$id'
+      fullPath: '/buyer/requests/$id'
+      preLoaderRoute: typeof AuthenticatedBuyerRequestsIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/buyer/requests/new': {
+      id: '/_authenticated/buyer/requests/new'
+      path: '/buyer/requests/new'
+      fullPath: '/buyer/requests/new'
+      preLoaderRoute: typeof AuthenticatedBuyerRequestsNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedBuyerDashboardRoute: typeof AuthenticatedBuyerDashboardRoute
+  AuthenticatedBuyerOrdersRoute: typeof AuthenticatedBuyerOrdersRoute
+  AuthenticatedSupplierDashboardRoute: typeof AuthenticatedSupplierDashboardRoute
+  AuthenticatedSupplierOffersRoute: typeof AuthenticatedSupplierOffersRoute
+  AuthenticatedSupplierProductsRoute: typeof AuthenticatedSupplierProductsRoute
+  AuthenticatedSupplierProfileRoute: typeof AuthenticatedSupplierProfileRoute
+  AuthenticatedSupplierRequestsRoute: typeof AuthenticatedSupplierRequestsRoute
+  AuthenticatedBuyerRequestsIdRoute: typeof AuthenticatedBuyerRequestsIdRoute
+  AuthenticatedBuyerRequestsNewRoute: typeof AuthenticatedBuyerRequestsNewRoute
+  AuthenticatedBuyerRequestsIndexRoute: typeof AuthenticatedBuyerRequestsIndexRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedBuyerDashboardRoute: AuthenticatedBuyerDashboardRoute,
+  AuthenticatedBuyerOrdersRoute: AuthenticatedBuyerOrdersRoute,
+  AuthenticatedSupplierDashboardRoute: AuthenticatedSupplierDashboardRoute,
+  AuthenticatedSupplierOffersRoute: AuthenticatedSupplierOffersRoute,
+  AuthenticatedSupplierProductsRoute: AuthenticatedSupplierProductsRoute,
+  AuthenticatedSupplierProfileRoute: AuthenticatedSupplierProfileRoute,
+  AuthenticatedSupplierRequestsRoute: AuthenticatedSupplierRequestsRoute,
+  AuthenticatedBuyerRequestsIdRoute: AuthenticatedBuyerRequestsIdRoute,
+  AuthenticatedBuyerRequestsNewRoute: AuthenticatedBuyerRequestsNewRoute,
+  AuthenticatedBuyerRequestsIndexRoute: AuthenticatedBuyerRequestsIndexRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AboutRoute: AboutRoute,
   CategoriesRoute: CategoriesRoute,
+  ContactRoute: ContactRoute,
   LoginRoute: LoginRoute,
+  PrivacyRoute: PrivacyRoute,
   RegisterRoute: RegisterRoute,
+  TermsRoute: TermsRoute,
   ProductsSlugRoute: ProductsSlugRoute,
   PurchaseRequestsIdRoute: PurchaseRequestsIdRoute,
   SuppliersIdRoute: SuppliersIdRoute,

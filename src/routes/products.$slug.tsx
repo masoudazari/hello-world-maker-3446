@@ -44,7 +44,7 @@ function ProductPage() {
   if (!data) return null;
   const { product, prices, images } = data;
   const supplier = product.suppliers;
-  const gallery = images.length > 0 ? images.map((i) => i.url) : product.image_url ? [product.image_url] : [];
+  const gallery = images.length > 0 ? images.map((i) => i.image_url) : product.image_url ? [product.image_url] : [];
 
   return (
     <PublicShell>

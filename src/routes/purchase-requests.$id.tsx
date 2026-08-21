@@ -69,13 +69,12 @@ function RequestPage() {
             <Row icon={<Package className="size-4" />} label="مقدار مورد نیاز" value={`${faNumber(request.quantity ?? 0)} ${request.unit ?? ""}`} />
             <Row icon={<MapPin className="size-4" />} label="شهر تحویل" value={request.delivery_city ?? "—"} />
             <Row label="کیفیت مورد انتظار" value={labelOf(QUALITY_LEVELS, request.quality)} />
-            <Row label="بازه زمانی" value={labelOf(TIMEFRAMES, request.timeframe)} />
-            <Row label="تاریخ نیاز" value={request.required_date ? faDate(request.required_date) : "—"} />
+            <Row label="بازه زمانی" value={labelOf(TIMEFRAMES, request.required_date)} />
             <Row label="دسته‌بندی" value={request.categories?.name ?? "—"} />
-            {(request.budget_min || request.budget_max) && (
+            {(request.min_price || request.max_price) && (
               <Row
                 label="بودجه"
-                value={`${toman(request.budget_min)} تا ${toman(request.budget_max)}`}
+                value={`${toman(request.min_price)} تا ${toman(request.max_price)}`}
               />
             )}
             <Row label="اعتبار درخواست" value={request.expires_at ? faDate(request.expires_at) : "—"} />
