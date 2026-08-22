@@ -260,6 +260,7 @@ export type Database = {
       }
       products: {
         Row: {
+          allow_partial_package: boolean
           base_price: number
           brand: string | null
           category_id: string | null
@@ -279,9 +280,12 @@ export type Database = {
           status: string
           stock: number
           supplier_id: string
+          tags: string[]
           unit: string
+          units_per_package: number | null
         }
         Insert: {
+          allow_partial_package?: boolean
           base_price?: number
           brand?: string | null
           category_id?: string | null
@@ -301,9 +305,12 @@ export type Database = {
           status?: string
           stock?: number
           supplier_id: string
+          tags?: string[]
           unit?: string
+          units_per_package?: number | null
         }
         Update: {
+          allow_partial_package?: boolean
           base_price?: number
           brand?: string | null
           category_id?: string | null
@@ -323,7 +330,9 @@ export type Database = {
           status?: string
           stock?: number
           supplier_id?: string
+          tags?: string[]
           unit?: string
+          units_per_package?: number | null
         }
         Relationships: [
           {
@@ -344,7 +353,12 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: string | null
           avatar_url: string | null
+          business_description: string | null
+          business_name: string | null
+          business_type: string | null
+          city: string | null
           created_at: string
           full_name: string
           id: string
@@ -352,7 +366,12 @@ export type Database = {
           status: string
         }
         Insert: {
+          address?: string | null
           avatar_url?: string | null
+          business_description?: string | null
+          business_name?: string | null
+          business_type?: string | null
+          city?: string | null
           created_at?: string
           full_name?: string
           id: string
@@ -360,7 +379,12 @@ export type Database = {
           status?: string
         }
         Update: {
+          address?: string | null
           avatar_url?: string | null
+          business_description?: string | null
+          business_name?: string | null
+          business_type?: string | null
+          city?: string | null
           created_at?: string
           full_name?: string
           id?: string
@@ -368,6 +392,111 @@ export type Database = {
           status?: string
         }
         Relationships: []
+      }
+      promotions: {
+        Row: {
+          category_id: string | null
+          created_at: string
+          description: string | null
+          discount_percent: number
+          ends_at: string
+          id: string
+          is_active: boolean
+          is_demo: boolean
+          product_id: string | null
+          starts_at: string
+          supplier_id: string | null
+          title: string
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          discount_percent?: number
+          ends_at?: string
+          id?: string
+          is_active?: boolean
+          is_demo?: boolean
+          product_id?: string | null
+          starts_at?: string
+          supplier_id?: string | null
+          title: string
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          discount_percent?: number
+          ends_at?: string
+          id?: string
+          is_active?: boolean
+          is_demo?: boolean
+          product_id?: string | null
+          starts_at?: string
+          supplier_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promotions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotions_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchase_request_items: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          product_name: string
+          quantity: number
+          request_id: string
+          unit: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          product_name: string
+          quantity: number
+          request_id: string
+          unit: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          product_name?: string
+          quantity?: number
+          request_id?: string
+          unit?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_request_items_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_requests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       purchase_requests: {
         Row: {
@@ -383,6 +512,7 @@ export type Database = {
           max_price: number | null
           min_price: number | null
           offers_count: number
+          product_id: string | null
           product_name: string
           quality: string
           quantity: number
@@ -403,6 +533,7 @@ export type Database = {
           max_price?: number | null
           min_price?: number | null
           offers_count?: number
+          product_id?: string | null
           product_name: string
           quality?: string
           quantity: number
@@ -423,6 +554,7 @@ export type Database = {
           max_price?: number | null
           min_price?: number | null
           offers_count?: number
+          product_id?: string | null
           product_name?: string
           quality?: string
           quantity?: number
@@ -436,6 +568,13 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_requests_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]
@@ -499,6 +638,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      stock_plans: {
+        Row: {
+          buyer_id: string
+          created_at: string
+          id: string
+          last_ordered_at: string | null
+          period_days: number
+          product_name: string
+          quantity: number
+          unit: string
+        }
+        Insert: {
+          buyer_id: string
+          created_at?: string
+          id?: string
+          last_ordered_at?: string | null
+          period_days?: number
+          product_name: string
+          quantity: number
+          unit?: string
+        }
+        Update: {
+          buyer_id?: string
+          created_at?: string
+          id?: string
+          last_ordered_at?: string | null
+          period_days?: number
+          product_name?: string
+          quantity?: number
+          unit?: string
+        }
+        Relationships: []
       }
       supplier_offers: {
         Row: {
@@ -582,6 +754,7 @@ export type Database = {
           founded_year: number | null
           id: string
           is_demo: boolean
+          last_seen_at: string | null
           logo_url: string | null
           official_invoice: boolean
           phone: string | null
@@ -605,6 +778,7 @@ export type Database = {
           founded_year?: number | null
           id?: string
           is_demo?: boolean
+          last_seen_at?: string | null
           logo_url?: string | null
           official_invoice?: boolean
           phone?: string | null
@@ -628,6 +802,7 @@ export type Database = {
           founded_year?: number | null
           id?: string
           is_demo?: boolean
+          last_seen_at?: string | null
           logo_url?: string | null
           official_invoice?: boolean
           phone?: string | null
