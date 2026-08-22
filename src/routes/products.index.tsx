@@ -79,7 +79,7 @@ function ProductsPage() {
   const { data } = useSuspenseQuery(productsQuery(search));
   const { data: facets } = useSuspenseQuery(facetsQuery);
 
-  const update = (patch: Partial<Search>) =>
+  const update = (patch: { [K in keyof Search]?: Search[K] | undefined }) =>
     void navigate({
       search: ((prev: Search) => cleanSearch<Search>({ ...prev, ...patch, page: patch.page ?? 1 })) as never,
     });

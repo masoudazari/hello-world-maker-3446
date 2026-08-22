@@ -51,7 +51,7 @@ function RequestsPage() {
   const navigate = useNavigate({ from: "/purchase-requests/" });
   const { data } = useSuspenseQuery(requestsQuery(search));
   const { data: categories } = useSuspenseQuery(categoriesQuery);
-  const update = (patch: Partial<Search>) =>
+  const update = (patch: { [K in keyof Search]?: Search[K] | undefined }) =>
     void navigate({ search: ((prev: Search) => cleanSearch<Search>({ ...prev, ...patch })) as never });
 
   return (
