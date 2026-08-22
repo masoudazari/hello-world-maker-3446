@@ -11,7 +11,7 @@ import { BUSINESS_TYPES, CITIES } from "@/lib/constants";
 import { cleanSearch } from "@/lib/search";
 import { faNumber } from "@/lib/format";
 
-type Search = { q?: string; city?: string; businessType?: string; verifiedOnly?: boolean };
+type Search = { q?: string | undefined; city?: string | undefined; businessType?: string | undefined; verifiedOnly?: boolean | undefined };
 const ALL = "__all__";
 
 function suppliersQuery(search: Search) {

@@ -11,7 +11,7 @@ import { CITIES } from "@/lib/constants";
 import { faNumber } from "@/lib/format";
 import { cleanSearch } from "@/lib/search";
 
-type Search = { q?: string; city?: string; category?: string };
+type Search = { q?: string | undefined; city?: string | undefined; category?: string | undefined };
 const ALL = "__all__";
 
 function requestsQuery(search: Search) {
