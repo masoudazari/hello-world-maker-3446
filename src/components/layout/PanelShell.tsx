@@ -73,7 +73,7 @@ export function PanelShell({
             {NAV[role].map((item) => (
               <Link
                 key={item.to}
-                to={item.to}
+                to={item.to as never}
                 activeOptions={{ exact: item.to === "/admin" }}
                 activeProps={{ className: "bg-primary/10 text-primary" }}
                 className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-muted-foreground transition hover:bg-secondary hover:text-foreground"

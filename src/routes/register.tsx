@@ -52,9 +52,9 @@ function RegisterPage() {
     }
     const { error: rpcError } = await supabase.rpc("setup_account", {
       _full_name: fullName,
-      _mobile: mobile || null,
+      ...(mobile ? { _mobile: mobile } : {}),
       _role: role,
-      _company_name: companyName || null,
+      ...(companyName ? { _company_name: companyName } : {}),
       _city: city,
     });
     setLoading(false);

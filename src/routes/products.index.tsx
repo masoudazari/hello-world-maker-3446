@@ -15,17 +15,17 @@ import { faNumber } from "@/lib/format";
 import { cleanSearch } from "@/lib/search";
 
 type Search = {
-  q?: string;
-  category?: string;
-  city?: string;
-  brand?: string;
-  businessType?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  maxMinimumOrder?: number;
-  verifiedOnly?: boolean;
-  inStockOnly?: boolean;
-  page?: number;
+  q?: string | undefined;
+  category?: string | undefined;
+  city?: string | undefined;
+  brand?: string | undefined;
+  businessType?: string | undefined;
+  minPrice?: number | undefined;
+  maxPrice?: number | undefined;
+  maxMinimumOrder?: number | undefined;
+  verifiedOnly?: boolean | undefined;
+  inStockOnly?: boolean | undefined;
+  page?: number | undefined;
 };
 
 const ALL = "__all__";
@@ -79,7 +79,7 @@ function ProductsPage() {
   const { data } = useSuspenseQuery(productsQuery(search));
   const { data: facets } = useSuspenseQuery(facetsQuery);
 
-  const update = (patch: Partial<Search>) =>
+  const update = (patch: { [K in keyof Search]?: Search[K] | undefined }) =>
     void navigate({
       search: ((prev: Search) => cleanSearch<Search>({ ...prev, ...patch, page: patch.page ?? 1 })) as never,
     });

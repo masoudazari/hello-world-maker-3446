@@ -11,7 +11,7 @@ import { CITIES } from "@/lib/constants";
 import { faNumber } from "@/lib/format";
 import { cleanSearch } from "@/lib/search";
 
-type Search = { q?: string; city?: string; category?: string };
+type Search = { q?: string | undefined; city?: string | undefined; category?: string | undefined };
 const ALL = "__all__";
 
 function requestsQuery(search: Search) {
@@ -51,7 +51,7 @@ function RequestsPage() {
   const navigate = useNavigate({ from: "/purchase-requests/" });
   const { data } = useSuspenseQuery(requestsQuery(search));
   const { data: categories } = useSuspenseQuery(categoriesQuery);
-  const update = (patch: Partial<Search>) =>
+  const update = (patch: { [K in keyof Search]?: Search[K] | undefined }) =>
     void navigate({ search: ((prev: Search) => cleanSearch<Search>({ ...prev, ...patch })) as never });
 
   return (

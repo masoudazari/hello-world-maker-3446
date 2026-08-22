@@ -18,6 +18,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as ProductsIndexRouteImport } from './routes/products.index'
 import { Route as ProductsSlugRouteImport } from './routes/products.$slug'
 import { Route as PurchaseRequestsIndexRouteImport } from './routes/purchase-requests.index'
@@ -25,6 +26,9 @@ import { Route as PurchaseRequestsIdRouteImport } from './routes/purchase-reques
 import { Route as SuppliersIndexRouteImport } from './routes/suppliers.index'
 import { Route as SuppliersIdRouteImport } from './routes/suppliers.$id'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
+import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated/admin.products'
+import { Route as AuthenticatedAdminRequestsRouteImport } from './routes/_authenticated/admin.requests'
+import { Route as AuthenticatedAdminSuppliersRouteImport } from './routes/_authenticated/admin.suppliers'
 import { Route as AuthenticatedBuyerDashboardRouteImport } from './routes/_authenticated/buyer.dashboard'
 import { Route as AuthenticatedBuyerOrdersRouteImport } from './routes/_authenticated/buyer.orders'
 import { Route as AuthenticatedSupplierDashboardRouteImport } from './routes/_authenticated/supplier.dashboard'
@@ -80,6 +84,12 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedNotificationsRoute =
+  AuthenticatedNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ProductsIndexRoute = ProductsIndexRouteImport.update({
   id: '/products/',
   path: '/products/',
@@ -115,6 +125,24 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminProductsRoute =
+  AuthenticatedAdminProductsRouteImport.update({
+    id: '/admin/products',
+    path: '/admin/products',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminRequestsRoute =
+  AuthenticatedAdminRequestsRouteImport.update({
+    id: '/admin/requests',
+    path: '/admin/requests',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminSuppliersRoute =
+  AuthenticatedAdminSuppliersRouteImport.update({
+    id: '/admin/suppliers',
+    path: '/admin/suppliers',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedBuyerDashboardRoute =
   AuthenticatedBuyerDashboardRouteImport.update({
     id: '/buyer/dashboard',
@@ -185,12 +213,16 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
   '/terms': typeof TermsRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/products/$slug': typeof ProductsSlugRoute
   '/purchase-requests/$id': typeof PurchaseRequestsIdRoute
   '/suppliers/$id': typeof SuppliersIdRoute
   '/products/': typeof ProductsIndexRoute
   '/purchase-requests/': typeof PurchaseRequestsIndexRoute
   '/suppliers/': typeof SuppliersIndexRoute
+  '/admin/products': typeof AuthenticatedAdminProductsRoute
+  '/admin/requests': typeof AuthenticatedAdminRequestsRoute
+  '/admin/suppliers': typeof AuthenticatedAdminSuppliersRoute
   '/buyer/dashboard': typeof AuthenticatedBuyerDashboardRoute
   '/buyer/orders': typeof AuthenticatedBuyerOrdersRoute
   '/supplier/dashboard': typeof AuthenticatedSupplierDashboardRoute
@@ -212,12 +244,16 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
   '/terms': typeof TermsRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/products/$slug': typeof ProductsSlugRoute
   '/purchase-requests/$id': typeof PurchaseRequestsIdRoute
   '/suppliers/$id': typeof SuppliersIdRoute
   '/products': typeof ProductsIndexRoute
   '/purchase-requests': typeof PurchaseRequestsIndexRoute
   '/suppliers': typeof SuppliersIndexRoute
+  '/admin/products': typeof AuthenticatedAdminProductsRoute
+  '/admin/requests': typeof AuthenticatedAdminRequestsRoute
+  '/admin/suppliers': typeof AuthenticatedAdminSuppliersRoute
   '/buyer/dashboard': typeof AuthenticatedBuyerDashboardRoute
   '/buyer/orders': typeof AuthenticatedBuyerOrdersRoute
   '/supplier/dashboard': typeof AuthenticatedSupplierDashboardRoute
@@ -241,12 +277,16 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
   '/terms': typeof TermsRoute
+  '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/products/$slug': typeof ProductsSlugRoute
   '/purchase-requests/$id': typeof PurchaseRequestsIdRoute
   '/suppliers/$id': typeof SuppliersIdRoute
   '/products/': typeof ProductsIndexRoute
   '/purchase-requests/': typeof PurchaseRequestsIndexRoute
   '/suppliers/': typeof SuppliersIndexRoute
+  '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRoute
+  '/_authenticated/admin/requests': typeof AuthenticatedAdminRequestsRoute
+  '/_authenticated/admin/suppliers': typeof AuthenticatedAdminSuppliersRoute
   '/_authenticated/buyer/dashboard': typeof AuthenticatedBuyerDashboardRoute
   '/_authenticated/buyer/orders': typeof AuthenticatedBuyerOrdersRoute
   '/_authenticated/supplier/dashboard': typeof AuthenticatedSupplierDashboardRoute
@@ -270,12 +310,16 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/register'
     | '/terms'
+    | '/notifications'
     | '/products/$slug'
     | '/purchase-requests/$id'
     | '/suppliers/$id'
     | '/products/'
     | '/purchase-requests/'
     | '/suppliers/'
+    | '/admin/products'
+    | '/admin/requests'
+    | '/admin/suppliers'
     | '/buyer/dashboard'
     | '/buyer/orders'
     | '/supplier/dashboard'
@@ -297,12 +341,16 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/register'
     | '/terms'
+    | '/notifications'
     | '/products/$slug'
     | '/purchase-requests/$id'
     | '/suppliers/$id'
     | '/products'
     | '/purchase-requests'
     | '/suppliers'
+    | '/admin/products'
+    | '/admin/requests'
+    | '/admin/suppliers'
     | '/buyer/dashboard'
     | '/buyer/orders'
     | '/supplier/dashboard'
@@ -325,12 +373,16 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/register'
     | '/terms'
+    | '/_authenticated/notifications'
     | '/products/$slug'
     | '/purchase-requests/$id'
     | '/suppliers/$id'
     | '/products/'
     | '/purchase-requests/'
     | '/suppliers/'
+    | '/_authenticated/admin/products'
+    | '/_authenticated/admin/requests'
+    | '/_authenticated/admin/suppliers'
     | '/_authenticated/buyer/dashboard'
     | '/_authenticated/buyer/orders'
     | '/_authenticated/supplier/dashboard'
@@ -427,6 +479,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/notifications': {
+      id: '/_authenticated/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/products/': {
       id: '/products/'
       path: '/products'
@@ -474,6 +533,27 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin/'
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/products': {
+      id: '/_authenticated/admin/products'
+      path: '/admin/products'
+      fullPath: '/admin/products'
+      preLoaderRoute: typeof AuthenticatedAdminProductsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/requests': {
+      id: '/_authenticated/admin/requests'
+      path: '/admin/requests'
+      fullPath: '/admin/requests'
+      preLoaderRoute: typeof AuthenticatedAdminRequestsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/suppliers': {
+      id: '/_authenticated/admin/suppliers'
+      path: '/admin/suppliers'
+      fullPath: '/admin/suppliers'
+      preLoaderRoute: typeof AuthenticatedAdminSuppliersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/buyer/dashboard': {
@@ -550,6 +630,10 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
+  AuthenticatedAdminProductsRoute: typeof AuthenticatedAdminProductsRoute
+  AuthenticatedAdminRequestsRoute: typeof AuthenticatedAdminRequestsRoute
+  AuthenticatedAdminSuppliersRoute: typeof AuthenticatedAdminSuppliersRoute
   AuthenticatedBuyerDashboardRoute: typeof AuthenticatedBuyerDashboardRoute
   AuthenticatedBuyerOrdersRoute: typeof AuthenticatedBuyerOrdersRoute
   AuthenticatedSupplierDashboardRoute: typeof AuthenticatedSupplierDashboardRoute
@@ -564,6 +648,10 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
+  AuthenticatedAdminProductsRoute: AuthenticatedAdminProductsRoute,
+  AuthenticatedAdminRequestsRoute: AuthenticatedAdminRequestsRoute,
+  AuthenticatedAdminSuppliersRoute: AuthenticatedAdminSuppliersRoute,
   AuthenticatedBuyerDashboardRoute: AuthenticatedBuyerDashboardRoute,
   AuthenticatedBuyerOrdersRoute: AuthenticatedBuyerOrdersRoute,
   AuthenticatedSupplierDashboardRoute: AuthenticatedSupplierDashboardRoute,

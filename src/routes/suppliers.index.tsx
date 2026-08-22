@@ -8,9 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BUSINESS_TYPES, CITIES } from "@/lib/constants";
+import { cleanSearch } from "@/lib/search";
 import { faNumber } from "@/lib/format";
 
-type Search = { q?: string; city?: string; businessType?: string; verifiedOnly?: boolean };
+type Search = { q?: string | undefined; city?: string | undefined; businessType?: string | undefined; verifiedOnly?: boolean | undefined };
 const ALL = "__all__";
 
 function suppliersQuery(search: Search) {
@@ -44,9 +45,10 @@ export const Route = createFileRoute("/suppliers/")({
 
 function SuppliersPage() {
   const search = Route.useSearch();
-  const navigate = useNavigate({ from: "/suppliers" });
+  const navigate = useNavigate({ from: "/suppliers/" });
   const { data } = useSuspenseQuery(suppliersQuery(search));
-  const update = (patch: Partial<Search>) => navigate({ search: (prev) => ({ ...prev, ...patch }) });
+  const update = (patch: Record<string, unknown>) =>
+    navigate({ search: ((prev: Record<string, unknown>) => cleanSearch<Search>({ ...prev, ...patch })) as never });
 
   return (
     <PublicShell>
