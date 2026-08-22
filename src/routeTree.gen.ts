@@ -24,6 +24,7 @@ import { Route as PurchaseRequestsIndexRouteImport } from './routes/purchase-req
 import { Route as PurchaseRequestsIdRouteImport } from './routes/purchase-requests.$id'
 import { Route as SuppliersIndexRouteImport } from './routes/suppliers.index'
 import { Route as SuppliersIdRouteImport } from './routes/suppliers.$id'
+import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedBuyerDashboardRouteImport } from './routes/_authenticated/buyer.dashboard'
 import { Route as AuthenticatedBuyerOrdersRouteImport } from './routes/_authenticated/buyer.orders'
 import { Route as AuthenticatedSupplierDashboardRouteImport } from './routes/_authenticated/supplier.dashboard'
@@ -109,6 +110,11 @@ const SuppliersIdRoute = SuppliersIdRouteImport.update({
   path: '/suppliers/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedBuyerDashboardRoute =
   AuthenticatedBuyerDashboardRouteImport.update({
     id: '/buyer/dashboard',
@@ -192,6 +198,7 @@ export interface FileRoutesByFullPath {
   '/supplier/products': typeof AuthenticatedSupplierProductsRoute
   '/supplier/profile': typeof AuthenticatedSupplierProfileRoute
   '/supplier/requests': typeof AuthenticatedSupplierRequestsRoute
+  '/admin/': typeof AuthenticatedAdminIndexRoute
   '/buyer/requests/$id': typeof AuthenticatedBuyerRequestsIdRoute
   '/buyer/requests/new': typeof AuthenticatedBuyerRequestsNewRoute
   '/buyer/requests/': typeof AuthenticatedBuyerRequestsIndexRoute
@@ -218,6 +225,7 @@ export interface FileRoutesByTo {
   '/supplier/products': typeof AuthenticatedSupplierProductsRoute
   '/supplier/profile': typeof AuthenticatedSupplierProfileRoute
   '/supplier/requests': typeof AuthenticatedSupplierRequestsRoute
+  '/admin': typeof AuthenticatedAdminIndexRoute
   '/buyer/requests/$id': typeof AuthenticatedBuyerRequestsIdRoute
   '/buyer/requests/new': typeof AuthenticatedBuyerRequestsNewRoute
   '/buyer/requests': typeof AuthenticatedBuyerRequestsIndexRoute
@@ -246,6 +254,7 @@ export interface FileRoutesById {
   '/_authenticated/supplier/products': typeof AuthenticatedSupplierProductsRoute
   '/_authenticated/supplier/profile': typeof AuthenticatedSupplierProfileRoute
   '/_authenticated/supplier/requests': typeof AuthenticatedSupplierRequestsRoute
+  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/buyer/requests/$id': typeof AuthenticatedBuyerRequestsIdRoute
   '/_authenticated/buyer/requests/new': typeof AuthenticatedBuyerRequestsNewRoute
   '/_authenticated/buyer/requests/': typeof AuthenticatedBuyerRequestsIndexRoute
@@ -274,6 +283,7 @@ export interface FileRouteTypes {
     | '/supplier/products'
     | '/supplier/profile'
     | '/supplier/requests'
+    | '/admin/'
     | '/buyer/requests/$id'
     | '/buyer/requests/new'
     | '/buyer/requests/'
@@ -300,6 +310,7 @@ export interface FileRouteTypes {
     | '/supplier/products'
     | '/supplier/profile'
     | '/supplier/requests'
+    | '/admin'
     | '/buyer/requests/$id'
     | '/buyer/requests/new'
     | '/buyer/requests'
@@ -327,6 +338,7 @@ export interface FileRouteTypes {
     | '/_authenticated/supplier/products'
     | '/_authenticated/supplier/profile'
     | '/_authenticated/supplier/requests'
+    | '/_authenticated/admin/'
     | '/_authenticated/buyer/requests/$id'
     | '/_authenticated/buyer/requests/new'
     | '/_authenticated/buyer/requests/'
@@ -457,6 +469,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SuppliersIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/': {
+      id: '/_authenticated/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/buyer/dashboard': {
       id: '/_authenticated/buyer/dashboard'
       path: '/buyer/dashboard'
@@ -538,6 +557,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSupplierProductsRoute: typeof AuthenticatedSupplierProductsRoute
   AuthenticatedSupplierProfileRoute: typeof AuthenticatedSupplierProfileRoute
   AuthenticatedSupplierRequestsRoute: typeof AuthenticatedSupplierRequestsRoute
+  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedBuyerRequestsIdRoute: typeof AuthenticatedBuyerRequestsIdRoute
   AuthenticatedBuyerRequestsNewRoute: typeof AuthenticatedBuyerRequestsNewRoute
   AuthenticatedBuyerRequestsIndexRoute: typeof AuthenticatedBuyerRequestsIndexRoute
@@ -551,6 +571,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSupplierProductsRoute: AuthenticatedSupplierProductsRoute,
   AuthenticatedSupplierProfileRoute: AuthenticatedSupplierProfileRoute,
   AuthenticatedSupplierRequestsRoute: AuthenticatedSupplierRequestsRoute,
+  AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   AuthenticatedBuyerRequestsIdRoute: AuthenticatedBuyerRequestsIdRoute,
   AuthenticatedBuyerRequestsNewRoute: AuthenticatedBuyerRequestsNewRoute,
   AuthenticatedBuyerRequestsIndexRoute: AuthenticatedBuyerRequestsIndexRoute,
