@@ -26,6 +26,7 @@ import { Route as SuppliersIndexRouteImport } from './routes/suppliers.index'
 import { Route as SuppliersIdRouteImport } from './routes/suppliers.$id'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated/admin.products'
+import { Route as AuthenticatedAdminRequestsRouteImport } from './routes/_authenticated/admin.requests'
 import { Route as AuthenticatedAdminSuppliersRouteImport } from './routes/_authenticated/admin.suppliers'
 import { Route as AuthenticatedBuyerDashboardRouteImport } from './routes/_authenticated/buyer.dashboard'
 import { Route as AuthenticatedBuyerOrdersRouteImport } from './routes/_authenticated/buyer.orders'
@@ -123,6 +124,12 @@ const AuthenticatedAdminProductsRoute =
     path: '/admin/products',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminRequestsRoute =
+  AuthenticatedAdminRequestsRouteImport.update({
+    id: '/admin/requests',
+    path: '/admin/requests',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminSuppliersRoute =
   AuthenticatedAdminSuppliersRouteImport.update({
     id: '/admin/suppliers',
@@ -206,6 +213,7 @@ export interface FileRoutesByFullPath {
   '/purchase-requests/': typeof PurchaseRequestsIndexRoute
   '/suppliers/': typeof SuppliersIndexRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
+  '/admin/requests': typeof AuthenticatedAdminRequestsRoute
   '/admin/suppliers': typeof AuthenticatedAdminSuppliersRoute
   '/buyer/dashboard': typeof AuthenticatedBuyerDashboardRoute
   '/buyer/orders': typeof AuthenticatedBuyerOrdersRoute
@@ -235,6 +243,7 @@ export interface FileRoutesByTo {
   '/purchase-requests': typeof PurchaseRequestsIndexRoute
   '/suppliers': typeof SuppliersIndexRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
+  '/admin/requests': typeof AuthenticatedAdminRequestsRoute
   '/admin/suppliers': typeof AuthenticatedAdminSuppliersRoute
   '/buyer/dashboard': typeof AuthenticatedBuyerDashboardRoute
   '/buyer/orders': typeof AuthenticatedBuyerOrdersRoute
@@ -266,6 +275,7 @@ export interface FileRoutesById {
   '/purchase-requests/': typeof PurchaseRequestsIndexRoute
   '/suppliers/': typeof SuppliersIndexRoute
   '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRoute
+  '/_authenticated/admin/requests': typeof AuthenticatedAdminRequestsRoute
   '/_authenticated/admin/suppliers': typeof AuthenticatedAdminSuppliersRoute
   '/_authenticated/buyer/dashboard': typeof AuthenticatedBuyerDashboardRoute
   '/_authenticated/buyer/orders': typeof AuthenticatedBuyerOrdersRoute
@@ -297,6 +307,7 @@ export interface FileRouteTypes {
     | '/purchase-requests/'
     | '/suppliers/'
     | '/admin/products'
+    | '/admin/requests'
     | '/admin/suppliers'
     | '/buyer/dashboard'
     | '/buyer/orders'
@@ -326,6 +337,7 @@ export interface FileRouteTypes {
     | '/purchase-requests'
     | '/suppliers'
     | '/admin/products'
+    | '/admin/requests'
     | '/admin/suppliers'
     | '/buyer/dashboard'
     | '/buyer/orders'
@@ -356,6 +368,7 @@ export interface FileRouteTypes {
     | '/purchase-requests/'
     | '/suppliers/'
     | '/_authenticated/admin/products'
+    | '/_authenticated/admin/requests'
     | '/_authenticated/admin/suppliers'
     | '/_authenticated/buyer/dashboard'
     | '/_authenticated/buyer/orders'
@@ -509,6 +522,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminProductsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/requests': {
+      id: '/_authenticated/admin/requests'
+      path: '/admin/requests'
+      fullPath: '/admin/requests'
+      preLoaderRoute: typeof AuthenticatedAdminRequestsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/suppliers': {
       id: '/_authenticated/admin/suppliers'
       path: '/admin/suppliers'
@@ -591,6 +611,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminProductsRoute: typeof AuthenticatedAdminProductsRoute
+  AuthenticatedAdminRequestsRoute: typeof AuthenticatedAdminRequestsRoute
   AuthenticatedAdminSuppliersRoute: typeof AuthenticatedAdminSuppliersRoute
   AuthenticatedBuyerDashboardRoute: typeof AuthenticatedBuyerDashboardRoute
   AuthenticatedBuyerOrdersRoute: typeof AuthenticatedBuyerOrdersRoute
@@ -607,6 +628,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminProductsRoute: AuthenticatedAdminProductsRoute,
+  AuthenticatedAdminRequestsRoute: AuthenticatedAdminRequestsRoute,
   AuthenticatedAdminSuppliersRoute: AuthenticatedAdminSuppliersRoute,
   AuthenticatedBuyerDashboardRoute: AuthenticatedBuyerDashboardRoute,
   AuthenticatedBuyerOrdersRoute: AuthenticatedBuyerOrdersRoute,
