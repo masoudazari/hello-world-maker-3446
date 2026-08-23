@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowLeft, BadgeCheck, ClipboardList, Handshake, Search, ShieldCheck, Sparkles } from "lucide-react";
 import { getHomeData } from "@/lib/catalog.functions";
@@ -9,6 +10,7 @@ import { RequestCard } from "@/components/catalog/RequestCard";
 import { Button } from "@/components/ui/button";
 import { brand } from "@/config/brand";
 import { faNumber } from "@/lib/format";
+
 
 const homeQuery = queryOptions({
   queryKey: ["home"],
