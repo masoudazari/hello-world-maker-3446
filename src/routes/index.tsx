@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowLeft, BadgeCheck, ClipboardList, Handshake, Search, ShieldCheck, Sparkles } from "lucide-react";
 import { getHomeData } from "@/lib/catalog.functions";
@@ -9,6 +10,7 @@ import { RequestCard } from "@/components/catalog/RequestCard";
 import { Button } from "@/components/ui/button";
 import { brand } from "@/config/brand";
 import { faNumber } from "@/lib/format";
+
 
 const homeQuery = queryOptions({
   queryKey: ["home"],
@@ -21,16 +23,16 @@ export const Route = createFileRoute("/")({
   },
   head: () => ({
     meta: [
-      { title: "عمده‌یار | بازار عمده‌فروشی B2B ایران" },
+      { title: "عمده‌یار | تأمین عمده کافه و رستوران" },
       {
         name: "description",
         content:
-          "درخواست خرید عمده ثبت کنید و در کمترین زمان از تولیدکنندگان، واردکنندگان و عمده‌فروشان معتبر ایران پیشنهاد قیمت بگیرید.",
+          "نیاز کافه یا رستوران خود را ثبت کنید و از پخش‌کننده‌ها و عمده‌فروش‌های معتبر پیشنهاد قیمت بگیرید.",
       },
-      { property: "og:title", content: "عمده‌یار | بازار عمده‌فروشی B2B ایران" },
+      { property: "og:title", content: "عمده‌یار | تأمین عمده کافه و رستوران" },
       {
         property: "og:description",
-        content: "اتصال مستقیم خریداران عمده به تأمین‌کنندگان معتبر، با استعلام قیمت رایگان.",
+        content: "اتصال مستقیم کافه‌ها و رستوران‌ها به تأمین‌کنندگان معتبر، با استعلام قیمت رایگان.",
       },
     ],
   }),
@@ -38,13 +40,15 @@ export const Route = createFileRoute("/")({
 });
 
 const STEPS = [
-  { icon: ClipboardList, title: "درخواست خود را ثبت کنید", text: "کالا، تعداد، شهر تحویل و زمان مورد نیاز را وارد کنید." },
-  { icon: Search, title: "تأمین‌کنندگان مطلع می‌شوند", text: "درخواست شما برای تأمین‌کنندگان فعال آن دسته ارسال می‌شود." },
-  { icon: Handshake, title: "پیشنهاد بگیرید و انتخاب کنید", text: "قیمت‌ها را مقایسه و بهترین پیشنهاد را نهایی کنید." },
+  { icon: ClipboardList, title: "نیازت رو بنویس", text: "مثلاً «۱۰۰ عدد کوکاکولا» — تعداد، شهر و زمان تحویل." },
+  { icon: Search, title: "تأمین‌کننده‌ها می‌بینند", text: "درخواست شما فوری برای پخش‌کننده‌های همان دسته ارسال می‌شود." },
+  { icon: Handshake, title: "قیمت‌ها را مقایسه کن", text: "بهترین پیشنهاد را انتخاب و سفارش را نهایی کنید." },
 ];
 
 function HomePage() {
   const { data } = useSuspenseQuery(homeQuery);
+  const navigate = useNavigate();
+  const [need, setNeed] = useState("");
 
   return (
     <PublicShell>
@@ -53,31 +57,55 @@ function HomePage() {
           <div>
             <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium">
               <Sparkles className="size-3.5" />
-              بازار عمده‌فروشی B2B ایران
+              مخصوص کافه‌ها و رستوران‌ها
             </span>
             <h1 className="mt-5 text-3xl font-extrabold leading-tight md:text-5xl md:leading-[1.15]">
-              {brand.tagline}
+              کافه یا رستوران شما به چه چیزی نیاز دارد؟
             </h1>
             <p className="mt-4 max-w-xl text-sm leading-7 text-primary-foreground/80 md:text-base">
-              {brand.description} یک بار درخواست بدهید، چند پیشنهاد قیمت دریافت کنید.
+              نیازت رو بنویس، تأمین‌کننده‌ها قیمت می‌دن. {brand.description}
             </p>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <Button size="lg" variant="secondary" asChild>
-                <Link to="/buyer/requests/new">
-                  ثبت رایگان درخواست خرید
+
+            <form
+              className="mt-7 flex flex-col gap-3 rounded-2xl bg-white/10 p-3 backdrop-blur sm:flex-row"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const q = need.trim();
+                if (!q) return;
+                void navigate({ to: "/products", search: { q } });
+              }}
+            >
+              <input
+                value={need}
+                onChange={(e) => setNeed(e.target.value)}
+                placeholder="مثلاً: ۱۰۰ عدد کوکاکولا"
+                aria-label="نیاز شما"
+                className="h-12 w-full rounded-xl bg-card px-4 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+              />
+              <div className="flex gap-2">
+                <Button type="submit" size="lg" variant="secondary" className="shrink-0">
+                  <Search className="size-4" />
+                  جستجو
+                </Button>
+                <Button
+                  type="button"
+                  size="lg"
+                  variant="outline"
+                  className="shrink-0 border-white/30 bg-transparent text-primary-foreground hover:bg-white/10 hover:text-primary-foreground"
+                  onClick={() =>
+                    void navigate({
+                      to: "/buyer/requests/new",
+                      search: need.trim() ? { need: need.trim() } : {},
+                    })
+                  }
+                >
+                  ثبت درخواست
                   <ArrowLeft className="size-4" />
-                </Link>
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-white/30 bg-transparent text-primary-foreground hover:bg-white/10 hover:text-primary-foreground"
-                asChild
-              >
-                <Link to="/products">مشاهده محصولات</Link>
-              </Button>
-            </div>
-            <dl className="mt-10 grid max-w-md grid-cols-3 gap-4 text-center">
+                </Button>
+              </div>
+            </form>
+
+            <dl className="mt-8 grid max-w-md grid-cols-3 gap-4 text-center">
               {[
                 { label: "کالای فعال", value: data.stats.products },
                 { label: "تأمین‌کننده", value: data.stats.suppliers },
@@ -92,7 +120,7 @@ function HomePage() {
           </div>
 
           <div className="rounded-3xl bg-white/10 p-6 backdrop-blur">
-            <h2 className="text-sm font-bold">دسته‌بندی‌های پرتقاضا</h2>
+            <h2 className="text-sm font-bold">دسته‌بندی‌های پرتقاضای کافه و رستوران</h2>
             <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
               {data.categories.slice(0, 9).map((c) => (
                 <Link
@@ -108,6 +136,7 @@ function HomePage() {
           </div>
         </div>
       </section>
+
 
       <section className="mx-auto max-w-7xl px-4 py-16">
         <h2 className="text-center text-2xl font-extrabold">عمده‌یار چگونه کار می‌کند؟</h2>
