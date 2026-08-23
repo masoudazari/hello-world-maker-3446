@@ -4,11 +4,10 @@ export type Option = { value: string; label: string };
 
 export const UNITS: Option[] = [
   { value: "عدد", label: "عدد" },
-  { value: "کیلوگرم", label: "کیلوگرم" },
   { value: "کارتن", label: "کارتن" },
+  { value: "کیلوگرم", label: "کیلوگرم" },
+  { value: "لیتر", label: "لیتر" },
   { value: "بسته", label: "بسته" },
-  { value: "متر", label: "متر" },
-  { value: "دستگاه", label: "دستگاه" },
   { value: "سایر", label: "سایر" },
 ];
 
@@ -27,11 +26,24 @@ export const TIMEFRAMES: Option[] = [
   { value: "flexible", label: "انعطاف‌پذیر" },
 ];
 
+/** Supplier business types — MVP focuses on cafe & restaurant supply chain. */
 export const BUSINESS_TYPES: Option[] = [
-  { value: "manufacturer", label: "تولیدکننده" },
-  { value: "importer", label: "واردکننده" },
-  { value: "distributor", label: "توزیع‌کننده" },
+  { value: "food_distributor", label: "پخش‌کننده مواد غذایی" },
+  { value: "beverage_distributor", label: "پخش‌کننده نوشیدنی" },
   { value: "wholesaler", label: "عمده‌فروش" },
+  { value: "importer", label: "واردکننده" },
+  { value: "manufacturer", label: "تولیدکننده" },
+  { value: "cafe_supplier", label: "تأمین‌کننده مواد اولیه کافه و رستوران" },
+  { value: "distributor", label: "توزیع‌کننده" },
+];
+
+/** Buyer business types — cafes and restaurants only in this MVP. */
+export const BUYER_TYPES: Option[] = [
+  { value: "cafe", label: "کافه" },
+  { value: "restaurant", label: "رستوران" },
+  { value: "fastfood", label: "فست‌فود" },
+  { value: "catering", label: "کترینگ" },
+  { value: "juice_icecream", label: "آبمیوه و بستنی‌فروشی" },
 ];
 
 export const CITIES: string[] = [
@@ -99,4 +111,13 @@ export const PAYMENT_TERMS: Option[] = [
 export function labelOf(options: Option[], value: string | null | undefined): string {
   if (!value) return "—";
   return options.find((o) => o.value === value)?.label ?? value;
+}
+
+/** Online presence buckets derived from suppliers.last_seen_at. */
+export function presenceOf(lastSeenAt: string | null | undefined): { label: string; tone: "online" | "recent" | "offline" } {
+  if (!lastSeenAt) return { label: "آفلاین", tone: "offline" };
+  const minutes = (Date.now() - new Date(lastSeenAt).getTime()) / 60000;
+  if (minutes <= 10) return { label: "آنلاین", tone: "online" };
+  if (minutes <= 60 * 24) return { label: "اخیراً فعال", tone: "recent" };
+  return { label: "آفلاین", tone: "offline" };
 }
