@@ -11,12 +11,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useAccount } from "@/lib/auth";
 import { CITIES, QUALITY_LEVELS, TIMEFRAMES, UNITS } from "@/lib/constants";
+import { parseNeed } from "@/lib/parse-need";
+import { cleanSearch } from "@/lib/search";
+
 
 export const Route = createFileRoute("/_authenticated/buyer/requests/new")({
+  validateSearch: (search: Record<string, unknown>): { need?: string | undefined } =>
+    cleanSearch<{ need?: string | undefined }>({ need: (search["need"] as string) || undefined }),
   head: () => ({
     meta: [
-      { title: "ثبت درخواست خرید عمده | عمده‌یار" },
-      { name: "description", content: "نیاز خرید عمده خود را ثبت کنید تا تأمین‌کنندگان پیشنهاد قیمت بدهند." },
+      { title: "ثبت درخواست خرید کافه و رستوران | عمده‌یار" },
+      { name: "description", content: "نیاز کافه یا رستوران خود را ثبت کنید تا تأمین‌کنندگان پیشنهاد قیمت بدهند." },
       { property: "og:title", content: "ثبت درخواست خرید عمده" },
       { property: "og:description", content: "یک بار ثبت کنید، چند پیشنهاد قیمت بگیرید." },
     ],
@@ -28,12 +33,15 @@ function NewRequestPage() {
   const { data: account } = useAccount();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { need } = Route.useSearch();
+  const parsed = parseNeed(need ?? "");
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const [form, setForm] = useState({
-    product_name: "",
+    product_name: parsed.productName,
     category_id: "",
-    quantity: "",
-    unit: "عدد",
+    quantity: parsed.quantity ? String(parsed.quantity) : "",
+    unit: parsed.unit ?? "عدد",
     quality: "any",
     delivery_city: "تهران",
     required_date: "flexible",
@@ -41,6 +49,7 @@ function NewRequestPage() {
     max_price: "",
     description: "",
   });
+
 
   const { data: categories = [] } = useQuery({
     queryKey: ["categories-flat"],
@@ -98,22 +107,7 @@ function NewRequestPage() {
         }}
       >
         <Field label="نام کالا" className="md:col-span-2">
-          <Input value={form.product_name} onChange={(e) => set("product_name")(e.target.value)} placeholder="مثلاً پارچه کتان ترک" />
-        </Field>
-
-        <Field label="دسته‌بندی">
-          <Select value={form.category_id} onValueChange={set("category_id")}>
-            <SelectTrigger className="w-full"><SelectValue placeholder="انتخاب کنید" /></SelectTrigger>
-            <SelectContent>
-              {categories.map((c) => (
-                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
-
-        <Field label="کیفیت مورد نظر">
-          <Options value={form.quality} onChange={set("quality")} options={QUALITY_LEVELS} />
+          <Input value={form.product_name} onChange={(e) => set("product_name")(e.target.value)} placeholder="مثلاً کوکاکولا قوطی ۳۳۰ میلی‌لیتر" />
         </Field>
 
         <Field label="مقدار">
@@ -132,22 +126,53 @@ function NewRequestPage() {
           <Options value={form.required_date} onChange={set("required_date")} options={TIMEFRAMES} />
         </Field>
 
-        <Field label="حداقل بودجه (تومان)">
-          <Input type="number" value={form.min_price} onChange={(e) => set("min_price")(e.target.value)} />
-        </Field>
+        <div className="md:col-span-2">
+          <button
+            type="button"
+            onClick={() => setShowAdvanced((v) => !v)}
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            {showAdvanced ? "بستن گزینه‌های بیشتر" : "گزینه‌های بیشتر (دسته‌بندی، کیفیت، بودجه، توضیحات)"}
+          </button>
+        </div>
 
-        <Field label="حداکثر بودجه (تومان)">
-          <Input type="number" value={form.max_price} onChange={(e) => set("max_price")(e.target.value)} />
-        </Field>
+        {showAdvanced && (
+          <>
+            <Field label="دسته‌بندی">
+              <Select value={form.category_id} onValueChange={set("category_id")}>
+                <SelectTrigger className="w-full"><SelectValue placeholder="انتخاب کنید" /></SelectTrigger>
+                <SelectContent>
+                  {categories.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
 
-        <Field label="توضیحات" className="md:col-span-2">
-          <Textarea
-            rows={4}
-            value={form.description}
-            onChange={(e) => set("description")(e.target.value)}
-            placeholder="مشخصات فنی، بسته‌بندی، شرایط پرداخت و هر نکته مهم دیگر"
-          />
-        </Field>
+            <Field label="کیفیت مورد نظر">
+              <Options value={form.quality} onChange={set("quality")} options={QUALITY_LEVELS} />
+            </Field>
+
+            <Field label="حداقل بودجه (تومان)">
+              <Input type="number" value={form.min_price} onChange={(e) => set("min_price")(e.target.value)} />
+            </Field>
+
+            <Field label="حداکثر بودجه (تومان)">
+              <Input type="number" value={form.max_price} onChange={(e) => set("max_price")(e.target.value)} />
+            </Field>
+
+            <Field label="توضیحات" className="md:col-span-2">
+              <Textarea
+                rows={4}
+                value={form.description}
+                onChange={(e) => set("description")(e.target.value)}
+                placeholder="بسته‌بندی، برند مورد نظر، شرایط پرداخت و هر نکته مهم دیگر"
+              />
+            </Field>
+          </>
+        )}
+
+
 
         <div className="md:col-span-2">
           <Button type="submit" disabled={mutation.isPending}>

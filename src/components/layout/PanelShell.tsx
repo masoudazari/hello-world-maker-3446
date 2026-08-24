@@ -7,12 +7,14 @@ import {
   FileText,
   LayoutDashboard,
   LogOut,
+  MessageSquare,
   Package,
   ShieldCheck,
   ShoppingBag,
   Store,
   Users,
 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { brand } from "@/config/brand";
 import { useAccount, useSignOut, type AppRole } from "@/lib/auth";
@@ -24,13 +26,16 @@ const NAV: Record<AppRole, NavItem[]> = {
     { to: "/buyer/dashboard", label: "داشبورد", icon: LayoutDashboard },
     { to: "/buyer/requests", label: "درخواست‌های من", icon: ClipboardList },
     { to: "/buyer/orders", label: "سفارش‌ها", icon: ShoppingBag },
+    { to: "/messages", label: "گفتگوها", icon: MessageSquare },
     { to: "/notifications", label: "اعلان‌ها", icon: Bell },
   ],
   supplier: [
     { to: "/supplier/dashboard", label: "داشبورد", icon: LayoutDashboard },
     { to: "/supplier/requests", label: "فرصت‌های فروش", icon: ClipboardList },
     { to: "/supplier/offers", label: "پیشنهادهای من", icon: FileText },
+    { to: "/supplier/orders", label: "سفارش‌ها", icon: ShoppingBag },
     { to: "/supplier/products", label: "محصولات", icon: Package },
+    { to: "/messages", label: "گفتگوها", icon: MessageSquare },
     { to: "/supplier/profile", label: "پروفایل فروشگاه", icon: Store },
     { to: "/notifications", label: "اعلان‌ها", icon: Bell },
   ],
@@ -41,6 +46,7 @@ const NAV: Record<AppRole, NavItem[]> = {
     { to: "/admin/requests", label: "درخواست‌ها", icon: Users },
   ],
 };
+
 
 export function PanelShell({
   role,
