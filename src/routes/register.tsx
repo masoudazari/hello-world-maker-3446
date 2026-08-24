@@ -50,18 +50,23 @@ function RegisterPage() {
       toast.error("ثبت‌نام انجام نشد", { description: signUpError.message });
       return;
     }
-    const { error: rpcError } = await supabase.rpc("setup_account", {
-      _full_name: fullName,
-      ...(mobile ? { _mobile: mobile } : {}),
-      _role: role,
-      ...(companyName ? { _company_name: companyName } : {}),
-      _city: city,
-    });
-    setLoading(false);
-    if (rpcError) {
-      toast.error("تکمیل حساب انجام نشد", { description: rpcError.message });
+    try {
+      await setupAccountFn({
+        data: {
+          fullName,
+          ...(mobile ? { mobile } : {}),
+          role,
+          ...(companyName ? { companyName } : {}),
+          city,
+        },
+      });
+    } catch (error) {
+      setLoading(false);
+      toast.error("تکمیل حساب انجام نشد", { description: (error as Error).message });
       return;
     }
+    setLoading(false);
+
     await queryClient.invalidateQueries({ queryKey: accountQueryKey });
     toast.success("حساب شما ساخته شد");
     navigate({ to: homeForRole(role), replace: true });
