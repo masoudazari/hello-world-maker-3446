@@ -107,22 +107,7 @@ function NewRequestPage() {
         }}
       >
         <Field label="نام کالا" className="md:col-span-2">
-          <Input value={form.product_name} onChange={(e) => set("product_name")(e.target.value)} placeholder="مثلاً پارچه کتان ترک" />
-        </Field>
-
-        <Field label="دسته‌بندی">
-          <Select value={form.category_id} onValueChange={set("category_id")}>
-            <SelectTrigger className="w-full"><SelectValue placeholder="انتخاب کنید" /></SelectTrigger>
-            <SelectContent>
-              {categories.map((c) => (
-                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
-
-        <Field label="کیفیت مورد نظر">
-          <Options value={form.quality} onChange={set("quality")} options={QUALITY_LEVELS} />
+          <Input value={form.product_name} onChange={(e) => set("product_name")(e.target.value)} placeholder="مثلاً کوکاکولا قوطی ۳۳۰ میلی‌لیتر" />
         </Field>
 
         <Field label="مقدار">
@@ -141,22 +126,53 @@ function NewRequestPage() {
           <Options value={form.required_date} onChange={set("required_date")} options={TIMEFRAMES} />
         </Field>
 
-        <Field label="حداقل بودجه (تومان)">
-          <Input type="number" value={form.min_price} onChange={(e) => set("min_price")(e.target.value)} />
-        </Field>
+        <div className="md:col-span-2">
+          <button
+            type="button"
+            onClick={() => setShowAdvanced((v) => !v)}
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            {showAdvanced ? "بستن گزینه‌های بیشتر" : "گزینه‌های بیشتر (دسته‌بندی، کیفیت، بودجه، توضیحات)"}
+          </button>
+        </div>
 
-        <Field label="حداکثر بودجه (تومان)">
-          <Input type="number" value={form.max_price} onChange={(e) => set("max_price")(e.target.value)} />
-        </Field>
+        {showAdvanced && (
+          <>
+            <Field label="دسته‌بندی">
+              <Select value={form.category_id} onValueChange={set("category_id")}>
+                <SelectTrigger className="w-full"><SelectValue placeholder="انتخاب کنید" /></SelectTrigger>
+                <SelectContent>
+                  {categories.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
 
-        <Field label="توضیحات" className="md:col-span-2">
-          <Textarea
-            rows={4}
-            value={form.description}
-            onChange={(e) => set("description")(e.target.value)}
-            placeholder="مشخصات فنی، بسته‌بندی، شرایط پرداخت و هر نکته مهم دیگر"
-          />
-        </Field>
+            <Field label="کیفیت مورد نظر">
+              <Options value={form.quality} onChange={set("quality")} options={QUALITY_LEVELS} />
+            </Field>
+
+            <Field label="حداقل بودجه (تومان)">
+              <Input type="number" value={form.min_price} onChange={(e) => set("min_price")(e.target.value)} />
+            </Field>
+
+            <Field label="حداکثر بودجه (تومان)">
+              <Input type="number" value={form.max_price} onChange={(e) => set("max_price")(e.target.value)} />
+            </Field>
+
+            <Field label="توضیحات" className="md:col-span-2">
+              <Textarea
+                rows={4}
+                value={form.description}
+                onChange={(e) => set("description")(e.target.value)}
+                placeholder="بسته‌بندی، برند مورد نظر، شرایط پرداخت و هر نکته مهم دیگر"
+              />
+            </Field>
+          </>
+        )}
+
+
 
         <div className="md:col-span-2">
           <Button type="submit" disabled={mutation.isPending}>
