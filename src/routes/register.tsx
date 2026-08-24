@@ -1,5 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
+
 import { toast } from "sonner";
 import { Boxes, Building2, Loader2, ShoppingCart } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -12,6 +14,8 @@ import { brand } from "@/config/brand";
 import { CITIES } from "@/lib/constants";
 import { accountQueryKey, homeForRole } from "@/lib/auth";
 import { cn } from "@/lib/utils";
+import { setupAccount } from "@/lib/account.functions";
+
 
 export const Route = createFileRoute("/register")({
   head: () => ({
@@ -28,7 +32,9 @@ export const Route = createFileRoute("/register")({
 function RegisterPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const setupAccountFn = useServerFn(setupAccount);
   const [role, setRole] = useState<"buyer" | "supplier">("buyer");
+
   const [fullName, setFullName] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [mobile, setMobile] = useState("");
@@ -50,18 +56,23 @@ function RegisterPage() {
       toast.error("ثبت‌نام انجام نشد", { description: signUpError.message });
       return;
     }
-    const { error: rpcError } = await supabase.rpc("setup_account", {
-      _full_name: fullName,
-      ...(mobile ? { _mobile: mobile } : {}),
-      _role: role,
-      ...(companyName ? { _company_name: companyName } : {}),
-      _city: city,
-    });
-    setLoading(false);
-    if (rpcError) {
-      toast.error("تکمیل حساب انجام نشد", { description: rpcError.message });
+    try {
+      await setupAccountFn({
+        data: {
+          fullName,
+          ...(mobile ? { mobile } : {}),
+          role,
+          ...(companyName ? { companyName } : {}),
+          city,
+        },
+      });
+    } catch (error) {
+      setLoading(false);
+      toast.error("تکمیل حساب انجام نشد", { description: (error as Error).message });
       return;
     }
+    setLoading(false);
+
     await queryClient.invalidateQueries({ queryKey: accountQueryKey });
     toast.success("حساب شما ساخته شد");
     navigate({ to: homeForRole(role), replace: true });
