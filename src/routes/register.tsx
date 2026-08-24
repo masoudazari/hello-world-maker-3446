@@ -14,6 +14,8 @@ import { brand } from "@/config/brand";
 import { CITIES } from "@/lib/constants";
 import { accountQueryKey, homeForRole } from "@/lib/auth";
 import { cn } from "@/lib/utils";
+import { setupAccount } from "@/lib/account.functions";
+
 
 export const Route = createFileRoute("/register")({
   head: () => ({
