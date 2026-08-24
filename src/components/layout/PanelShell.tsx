@@ -7,12 +7,14 @@ import {
   FileText,
   LayoutDashboard,
   LogOut,
+  MessageSquare,
   Package,
   ShieldCheck,
   ShoppingBag,
   Store,
   Users,
 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { brand } from "@/config/brand";
 import { useAccount, useSignOut, type AppRole } from "@/lib/auth";
