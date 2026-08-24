@@ -11,6 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useAccount } from "@/lib/auth";
 import { CITIES, QUALITY_LEVELS, TIMEFRAMES, UNITS } from "@/lib/constants";
+import { parseNeed } from "@/lib/parse-need";
+import { cleanSearch } from "@/lib/search";
+
 
 export const Route = createFileRoute("/_authenticated/buyer/requests/new")({
   validateSearch: (search: Record<string, unknown>): { need?: string | undefined } =>
