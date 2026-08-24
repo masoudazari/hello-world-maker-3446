@@ -142,7 +142,7 @@ function ProductPage() {
                 حداقل سفارش: {faNumber(product.minimum_order)} {product.unit}
               </p>
               <Button className="mt-5 w-full" size="lg" asChild>
-                <Link to="/buyer/requests/new" search={{ product: product.name }}>
+                <Link to="/buyer/requests/new" search={{ need: `${product.minimum_order} ${product.unit} ${product.name}` }}>
                   استعلام قیمت / ثبت درخواست
                 </Link>
               </Button>
