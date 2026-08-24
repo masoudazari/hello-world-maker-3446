@@ -1,5 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
+
 import { toast } from "sonner";
 import { Boxes, Building2, Loader2, ShoppingCart } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -28,7 +30,9 @@ export const Route = createFileRoute("/register")({
 function RegisterPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const setupAccountFn = useServerFn(setupAccount);
   const [role, setRole] = useState<"buyer" | "supplier">("buyer");
+
   const [fullName, setFullName] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [mobile, setMobile] = useState("");
