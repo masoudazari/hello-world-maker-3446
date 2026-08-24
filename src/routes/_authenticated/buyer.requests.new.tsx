@@ -13,10 +13,12 @@ import { useAccount } from "@/lib/auth";
 import { CITIES, QUALITY_LEVELS, TIMEFRAMES, UNITS } from "@/lib/constants";
 
 export const Route = createFileRoute("/_authenticated/buyer/requests/new")({
+  validateSearch: (search: Record<string, unknown>): { need?: string | undefined } =>
+    cleanSearch<{ need?: string | undefined }>({ need: (search["need"] as string) || undefined }),
   head: () => ({
     meta: [
-      { title: "ثبت درخواست خرید عمده | عمده‌یار" },
-      { name: "description", content: "نیاز خرید عمده خود را ثبت کنید تا تأمین‌کنندگان پیشنهاد قیمت بدهند." },
+      { title: "ثبت درخواست خرید کافه و رستوران | عمده‌یار" },
+      { name: "description", content: "نیاز کافه یا رستوران خود را ثبت کنید تا تأمین‌کنندگان پیشنهاد قیمت بدهند." },
       { property: "og:title", content: "ثبت درخواست خرید عمده" },
       { property: "og:description", content: "یک بار ثبت کنید، چند پیشنهاد قیمت بگیرید." },
     ],
@@ -28,12 +30,15 @@ function NewRequestPage() {
   const { data: account } = useAccount();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { need } = Route.useSearch();
+  const parsed = parseNeed(need ?? "");
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const [form, setForm] = useState({
-    product_name: "",
+    product_name: parsed.productName,
     category_id: "",
-    quantity: "",
-    unit: "عدد",
+    quantity: parsed.quantity ? String(parsed.quantity) : "",
+    unit: parsed.unit ?? "عدد",
     quality: "any",
     delivery_city: "تهران",
     required_date: "flexible",
@@ -41,6 +46,7 @@ function NewRequestPage() {
     max_price: "",
     description: "",
   });
+
 
   const { data: categories = [] } = useQuery({
     queryKey: ["categories-flat"],
