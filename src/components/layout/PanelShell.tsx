@@ -13,6 +13,7 @@ import {
   ShoppingBag,
   Store,
   Tags,
+  TrendingUp,
   Users,
 } from "lucide-react";
 
@@ -37,6 +38,7 @@ const NAV: Record<AppRole, NavItem[]> = {
     { to: "/supplier/orders", label: "سفارش‌ها", icon: ShoppingBag },
     { to: "/supplier/products", label: "محصولات", icon: Package },
     { to: "/supplier/bulk-pricing", label: "مدیریت قیمت گروهی", icon: Tags },
+    { to: "/market-prices", label: "مقایسه قیمت بازار", icon: TrendingUp },
     { to: "/supplier/customers", label: "مشتریان", icon: Users },
     { to: "/messages", label: "گفتگوها", icon: MessageSquare },
     { to: "/supplier/profile", label: "پروفایل فروشگاه", icon: Store },

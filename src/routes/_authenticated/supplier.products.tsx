@@ -45,6 +45,20 @@ function SupplierProducts() {
     },
   });
 
+  const { data: marketStats = [] } = useQuery({
+    queryKey: ["product-market-stats", supplierId],
+    enabled: Boolean(supplierId),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("product_market_stats")
+        .select("product_id, sample_count, market_min, market_avg, market_max, includes_mock_data")
+        .eq("supplier_id", supplierId!);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const marketByProduct = new Map(marketStats.map((m) => [m.product_id, m]));
+
   return (
     <PanelShell
       role="supplier"
@@ -67,10 +81,13 @@ function SupplierProducts() {
                 <th className="p-3 font-medium">موجودی</th>
                 <th className="p-3 font-medium">شهر</th>
                 <th className="p-3 font-medium">وضعیت</th>
+                <th className="p-3 font-medium">وضعیت بازار</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {products.map((p) => (
+              {products.map((p) => {
+                const stat = marketByProduct.get(p.id);
+                return (
                 <tr key={p.id}>
                   <td className="p-3 font-medium">{p.name}</td>
                   <td className="p-3">{toman(p.base_price)}</td>
@@ -78,8 +95,32 @@ function SupplierProducts() {
                   <td className="p-3">{faNumber(p.stock)}</td>
                   <td className="p-3">{p.city}</td>
                   <td className="p-3"><StatusBadge kind="product" value={p.status} /></td>
+                  <td className="p-3 text-xs">
+                    {!stat || Number(stat.sample_count) === 0 ? (
+                      <span className="text-muted-foreground">داده کافی نیست</span>
+                    ) : (
+                      <span
+                        className={
+                          p.base_price < Number(stat.market_avg) * 0.9
+                            ? "text-emerald-600"
+                            : p.base_price > Number(stat.market_avg) * 1.1
+                              ? "text-red-500"
+                              : "text-muted-foreground"
+                        }
+                      >
+                        {p.base_price < Number(stat.market_avg) * 0.9
+                          ? "رقابتی"
+                          : p.base_price > Number(stat.market_avg) * 1.1
+                            ? "بالاتر از بازار"
+                            : "نزدیک به بازار"}{" "}
+                        (میانگین بازار: {toman(Number(stat.market_avg))}
+                        {stat.includes_mock_data ? "، شامل داده Mock" : ""})
+                      </span>
+                    )}
+                  </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
