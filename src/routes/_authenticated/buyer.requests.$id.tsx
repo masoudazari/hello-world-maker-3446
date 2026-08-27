@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -5,10 +6,14 @@ import { PanelShell } from "@/components/layout/PanelShell";
 import { EmptyState } from "@/components/common/EmptyState";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { Button } from "@/components/ui/button";
+import { RequestOfferChat } from "@/components/rfq/RequestOfferChat";
 import { supabase } from "@/integrations/supabase/client";
 import { useAccount } from "@/lib/auth";
 import { labelOf, QUALITY_LEVELS, TIMEFRAMES } from "@/lib/constants";
 import { faDate, faNumber, toman } from "@/lib/format";
+
+const TOP_OFFERS_COUNT = 6;
+const MEDALS = ["🥇", "🥈", "🥉"];
 
 export const Route = createFileRoute("/_authenticated/buyer/requests/$id")({
   head: () => ({
@@ -40,7 +45,7 @@ function BuyerRequestDetail() {
         supabase
           .from("supplier_offers")
           .select(
-            "id, unit_price, total_price, available_quantity, preparation_time, shipping_time, shipping_cost, payment_terms, description, status, created_at, suppliers(id, company_name, city, rating, verification_status)",
+            "id, unit_price, total_price, available_quantity, preparation_time, shipping_time, shipping_cost, payment_terms, description, status, created_at, suppliers(id, company_name, city, rating, verification_status, response_rate)",
           )
           .eq("request_id", id)
           .order("unit_price", { ascending: true }),
@@ -75,6 +80,28 @@ function BuyerRequestDetail() {
   });
 
   const request = data?.request;
+  const [showAllOffers, setShowAllOffers] = useState(false);
+  const [openChatOfferId, setOpenChatOfferId] = useState<string | null>(null);
+
+  const rankedOffers = useMemo(() => {
+    const offers = data?.offers ?? [];
+    if (offers.length === 0) return [];
+    const prices = offers.map((o) => o.unit_price);
+    const minPrice = Math.min(...prices);
+    const maxPrice = Math.max(...prices);
+    const priceRange = maxPrice - minPrice || 1;
+    return offers
+      .map((o) => {
+        const priceScore = 1 - (o.unit_price - minPrice) / priceRange; // lower price → higher score
+        const ratingScore = Number(o.suppliers?.rating ?? 0) / 5;
+        const responseScore = Number(o.suppliers?.response_rate ?? 0) / 100;
+        const score = priceScore * 0.5 + ratingScore * 0.3 + responseScore * 0.2;
+        return { ...o, score };
+      })
+      .sort((a, b) => b.score - a.score);
+  }, [data?.offers]);
+
+  const visibleOffers = showAllOffers ? rankedOffers : rankedOffers.slice(0, TOP_OFFERS_COUNT);
 
   return (
     <PanelShell
@@ -102,19 +129,29 @@ function BuyerRequestDetail() {
             )}
           </div>
 
-          <h2 className="mt-8 mb-3 text-sm font-bold">پیشنهادهای دریافتی ({faNumber(data?.offers.length ?? 0)})</h2>
-          {(data?.offers.length ?? 0) === 0 ? (
+          <div className="mt-8 mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-bold">پیشنهادهای دریافتی ({faNumber(data?.offers.length ?? 0)})</h2>
+            {rankedOffers.length > TOP_OFFERS_COUNT && (
+              <Button variant="ghost" size="sm" onClick={() => setShowAllOffers((v) => !v)}>
+                {showAllOffers ? "نمایش فقط برترین‌ها" : `نمایش سایر پیشنهادها (${faNumber(rankedOffers.length - TOP_OFFERS_COUNT)})`}
+              </Button>
+            )}
+          </div>
+          {rankedOffers.length === 0 ? (
             <EmptyState
               title="هنوز پیشنهادی ثبت نشده"
               description="به‌محض ارسال پیشنهاد توسط تأمین‌کنندگان، همین‌جا نمایش داده می‌شود."
             />
           ) : (
             <div className="grid gap-3">
-              {data!.offers.map((offer) => (
+              {visibleOffers.map((offer, index) => (
                 <div key={offer.id} className="rounded-2xl border border-border bg-card p-5">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                      <p className="font-semibold">{offer.suppliers?.company_name}</p>
+                      <p className="font-semibold">
+                        {index < 3 && !showAllOffers ? `${MEDALS[index]} ` : ""}
+                        {offer.suppliers?.company_name}
+                      </p>
                       <p className="mt-1 text-xs text-muted-foreground">
                         {offer.suppliers?.city} · امتیاز {faNumber(Number(offer.suppliers?.rating ?? 0))}
                       </p>
@@ -140,6 +177,13 @@ function BuyerRequestDetail() {
                     </span>
                     <div className="flex items-center gap-2">
                       <StatusBadge kind="offer" value={offer.status} />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setOpenChatOfferId(openChatOfferId === offer.id ? null : offer.id)}
+                      >
+                        {openChatOfferId === offer.id ? "بستن مذاکره" : "مذاکره"}
+                      </Button>
                       {offer.status === "pending" && request.status !== "accepted" && (
                         <Button
                           size="sm"
@@ -158,6 +202,12 @@ function BuyerRequestDetail() {
                       )}
                     </div>
                   </div>
+
+                  {openChatOfferId === offer.id && account?.userId && (
+                    <div className="mt-4">
+                      <RequestOfferChat requestId={id} supplierId={offer.suppliers!.id} currentUserId={account.userId} />
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
