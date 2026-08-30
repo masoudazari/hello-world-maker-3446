@@ -63,7 +63,7 @@ function SupplierProducts() {
     <PanelShell
       role="supplier"
       title="محصولات من"
-      subtitle="محصولات پس از تأیید مدیر در فهرست عمومی نمایش داده می‌شوند."
+      subtitle="محصولات پس از ثبت بلافاصله در فهرست عمومی نمایش داده می‌شوند."
       action={supplierId ? <ProductDialog supplierId={supplierId} /> : null}
     >
       {!supplierId ? (
@@ -169,7 +169,7 @@ function ProductDialog({ supplierId }: { supplierId: string }) {
         base_price: Number(form.base_price) || 0,
         description: form.description || null,
         image_url: form.image_url || null,
-        status: "pending_review",
+        status: "active",
       });
       if (error) throw error;
     },

@@ -81,7 +81,69 @@ function hashString(input: string): number {
   return hash;
 }
 
-const PROVIDERS: PriceProvider[] = [new MockProvider()];
+const PROVIDERS: PriceProvider[] = [new MockProvider(), new GoogleShoppingSearchProvider()];
+
+// ---- Google Programmable Search provider (real, optional) -----------------
+// This is the legitimate alternative to scraping Torob directly: Google's
+// Custom Search JSON API is an official, ToS-compliant product. It returns
+// search result snippets, not a guaranteed structured price feed, so prices
+// extracted from snippet text are best-effort approximations, not authoritative
+// quotes — the UI must keep treating this as such.
+//
+// To activate: create a Programmable Search Engine at
+// https://programmablesearchengine.google.com (scoped to shopping/retail
+// sites if you want tighter results), get an API key from Google Cloud
+// Console, and set these two Supabase Edge Function secrets:
+//   GOOGLE_CSE_API_KEY
+//   GOOGLE_CSE_CX
+// Until both are set, this provider silently returns zero results — it
+// never fabricates data — and the mock provider keeps the page usable.
+class GoogleShoppingSearchProvider implements PriceProvider {
+  slug = "google-search";
+
+  async fetchPrices(query: string): Promise<NormalizedPriceResult[]> {
+    const apiKey = Deno.env.get("GOOGLE_CSE_API_KEY");
+    const cx = Deno.env.get("GOOGLE_CSE_CX");
+    if (!apiKey || !cx) return [];
+
+    const url = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cx}&q=${encodeURIComponent(
+      `${query} قیمت`,
+    )}&num=10`;
+    const res = await fetch(url);
+    if (!res.ok) {
+      console.error("google cse error", res.status, await res.text());
+      return [];
+    }
+    const json = await res.json();
+    const items: { title?: string; snippet?: string; link?: string; displayLink?: string }[] = json.items ?? [];
+
+    const results: NormalizedPriceResult[] = [];
+    for (const item of items) {
+      const price = extractTomanPrice(`${item.title ?? ""} ${item.snippet ?? ""}`);
+      if (price === null) continue; // skip results with no extractable price — never guess
+      results.push({
+        sourceSlug: this.slug,
+        productName: query,
+        sellerName: item.displayLink ?? "نتیجه گوگل",
+        price,
+        productUrl: item.link,
+        isMock: false,
+      });
+    }
+    return results;
+  }
+}
+
+// Best-effort Toman/Rial price extraction from Persian search snippets.
+// Returns null (never a guess) when no clear price pattern is found.
+function extractTomanPrice(text: string): number | null {
+  const normalized = text.replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))).replace(/,/g, "");
+  const match = normalized.match(/(\d{4,9})\s*(تومان|ریال)/);
+  if (!match) return null;
+  let value = Number(match[1]);
+  if (match[2] === "ریال") value = Math.round(value / 10);
+  return value > 0 ? value : null;
+}
 
 Deno.serve(async (req) => {
   if (req.method !== "POST") {

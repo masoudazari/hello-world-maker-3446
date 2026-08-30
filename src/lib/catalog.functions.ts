@@ -31,6 +31,7 @@ export const listProducts = createServerFn({ method: "GET" })
   .inputValidator((data: ProductFilters) => data ?? {})
   .handler(async ({ data }) => {
     const { publicClient } = await import("./supabase-public.server");
+    const { getSearchVariants } = await import("./bilingual-search");
     const supabase = publicClient();
     const perPage = Math.min(data.perPage ?? 24, 60);
     const page = Math.max(data.page ?? 1, 1);
@@ -64,7 +65,13 @@ export const listProducts = createServerFn({ method: "GET" })
       )
       .eq("status", "active");
 
-    if (data.q) query = query.ilike("name", `%${data.q}%`);
+    if (data.q) {
+      // Search both name and brand, and treat known Persian/English
+      // aliases as equivalent (e.g. "pepsi" also matches "پپسی").
+      const variants = getSearchVariants(data.q);
+      const orClauses = variants.flatMap((term) => [`name.ilike.%${term}%`, `brand.ilike.%${term}%`]);
+      query = query.or(orClauses.join(","));
+    }
     if (categoryId) query = query.eq("category_id", categoryId);
     if (data.city) query = query.eq("city", data.city);
     if (data.brand) query = query.eq("brand", data.brand);
@@ -151,6 +158,7 @@ export const listOpenRequests = createServerFn({ method: "GET" })
   .inputValidator((data: { q?: string; category?: string; city?: string; limit?: number }) => data ?? {})
   .handler(async ({ data }) => {
     const { publicClient } = await import("./supabase-public.server");
+    const { getSearchVariants } = await import("./bilingual-search");
     const supabase = publicClient();
     let query = supabase
       .from("purchase_requests")
@@ -158,7 +166,11 @@ export const listOpenRequests = createServerFn({ method: "GET" })
       .neq("status", "closed")
       .order("created_at", { ascending: false })
       .limit(Math.min(data.limit ?? 40, 60));
-    if (data.q) query = query.ilike("product_name", `%${data.q}%`);
+    if (data.q) {
+      const variants = getSearchVariants(data.q);
+      const orClauses = variants.flatMap((term) => [`product_name.ilike.%${term}%`, `description.ilike.%${term}%`]);
+      query = query.or(orClauses.join(","));
+    }
     if (data.city) query = query.eq("delivery_city", data.city);
     if (data.category) {
       const { data: cat } = await supabase.from("categories").select("id").eq("slug", data.category).maybeSingle();

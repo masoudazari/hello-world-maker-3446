@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { Search } from "lucide-react";
 import { PanelShell } from "@/components/layout/PanelShell";
 import { EmptyState } from "@/components/common/EmptyState";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAccount } from "@/lib/auth";
 import { labelOf, PAYMENT_TERMS, QUALITY_LEVELS, TIMEFRAMES } from "@/lib/constants";
 import { faNumber, timeAgo, toman } from "@/lib/format";
+import { matchesQuery } from "@/lib/bilingual-search";
 
 export const Route = createFileRoute("/_authenticated/supplier/requests")({
   head: () => ({
@@ -38,24 +40,53 @@ type RequestRow = {
   description: string | null;
   offers_count: number;
   created_at: string;
+  category_id: string | null;
 };
 
 function SupplierRequests() {
   const { data: account } = useAccount();
   const supplierId = account?.supplierId ?? null;
+  const [search, setSearch] = useState("");
+  const [showAllCategories, setShowAllCategories] = useState(false);
+
+  const { data: myCategoryIds = [] } = useQuery({
+    queryKey: ["supplier-category-ids", supplierId],
+    enabled: Boolean(supplierId),
+    queryFn: async () => {
+      const { data } = await supabase.from("products").select("category_id").eq("supplier_id", supplierId!);
+      return Array.from(new Set((data ?? []).map((p) => p.category_id).filter(Boolean))) as string[];
+    },
+  });
 
   const { data: requests = [] } = useQuery({
     queryKey: ["supplier-opportunities"],
     queryFn: async () => {
       const { data } = await supabase
         .from("purchase_requests")
-        .select("id, product_name, quantity, unit, quality, delivery_city, required_date, description, offers_count, created_at")
+        .select(
+          "id, product_name, quantity, unit, quality, delivery_city, required_date, description, offers_count, created_at, category_id",
+        )
         .in("status", ["pending", "matching", "offers_received", "buyer_reviewing"])
         .order("created_at", { ascending: false })
         .limit(50);
       return (data ?? []) as RequestRow[];
     },
   });
+
+  const visibleRequests = useMemo(() => {
+    return requests.filter((r) => {
+      // Only requests matching the supplier's own product categories are
+      // shown by default — a soda wholesaler shouldn't have to wade
+      // through requests for construction materials. Suppliers with no
+      // products yet, or who explicitly ask to see everything, get the
+      // unfiltered list.
+      const categoryMatches =
+        showAllCategories || myCategoryIds.length === 0 || (r.category_id && myCategoryIds.includes(r.category_id));
+      if (!categoryMatches) return false;
+      if (!search.trim()) return true;
+      return matchesQuery(r.product_name, search) || matchesQuery(r.description, search);
+    });
+  }, [requests, myCategoryIds, showAllCategories, search]);
 
   const { data: myOfferIds = [] } = useQuery({
     queryKey: ["supplier-offer-ids", supplierId],
@@ -73,11 +104,27 @@ function SupplierRequests() {
           برای ارسال پیشنهاد ابتدا پروفایل فروشگاه خود را در بخش «پروفایل فروشگاه» تکمیل کنید.
         </div>
       )}
-      {requests.length === 0 ? (
-        <EmptyState title="در حال حاضر درخواست بازی وجود ندارد" />
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <div className="relative max-w-sm flex-1">
+          <Search className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="جستجو (فارسی یا انگلیسی)، مثلاً: پپسی یا pepsi"
+            className="pr-9"
+          />
+        </div>
+        {myCategoryIds.length > 0 && (
+          <Button variant="ghost" size="sm" onClick={() => setShowAllCategories((v) => !v)}>
+            {showAllCategories ? "فقط دسته‌های مرتبط با من" : "نمایش همه دسته‌بندی‌ها"}
+          </Button>
+        )}
+      </div>
+      {visibleRequests.length === 0 ? (
+        <EmptyState title="درخواستی مطابق این فیلتر پیدا نشد" />
       ) : (
         <div className="grid gap-3">
-          {requests.map((r) => (
+          {visibleRequests.map((r) => (
             <div key={r.id} className="rounded-2xl border border-border bg-card p-5">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>

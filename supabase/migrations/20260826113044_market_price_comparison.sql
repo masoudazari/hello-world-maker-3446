@@ -65,6 +65,15 @@ insert into public.price_sources (slug, name, is_mock, is_active, notes)
 values ('mock-demo', 'داده نمایشی (Mock)', true, true, 'داده واقعی نیست؛ فقط برای تست معماری و UI است.')
 on conflict (slug) do nothing;
 
+-- A real, ToS-compliant source using Google's official Custom Search API.
+-- Registered active by default: if the required secrets (GOOGLE_CSE_API_KEY,
+-- GOOGLE_CSE_CX) aren't set in the edge function yet, it simply returns no
+-- rows rather than fabricating data — see supabase/functions/market-price-collector.
+insert into public.price_sources (slug, name, is_mock, is_active, notes)
+values ('google-search', 'جستجوی گوگل (Custom Search API رسمی)', false, true,
+  'نیازمند تنظیم GOOGLE_CSE_API_KEY و GOOGLE_CSE_CX در Edge Function secrets؛ تا آن زمان نتیجه خالی برمی‌گرداند.')
+on conflict (slug) do nothing;
+
 -- A placeholder row for a real future source, inactive until someone
 -- actually wires it up per its terms of use / official API.
 insert into public.price_sources (slug, name, is_mock, is_active, notes)
