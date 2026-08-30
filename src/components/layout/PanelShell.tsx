@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   ShoppingBag,
   Store,
+  Sparkles,
   Tags,
   TrendingUp,
   Users,
@@ -49,6 +50,7 @@ const NAV: Record<AppRole, NavItem[]> = {
     { to: "/admin/suppliers", label: "تأمین‌کنندگان", icon: ShieldCheck },
     { to: "/admin/products", label: "محصولات", icon: Boxes },
     { to: "/admin/requests", label: "درخواست‌ها", icon: Users },
+    { to: "/admin/promotions", label: "پیشنهادهای تبلیغاتی", icon: Sparkles },
   ],
 };
 

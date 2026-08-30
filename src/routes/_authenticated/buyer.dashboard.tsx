@@ -56,9 +56,14 @@ function BuyerDashboard() {
       title="داشبورد خریدار"
       subtitle="وضعیت درخواست‌ها و سفارش‌های شما در یک نگاه"
       action={
-        <Button asChild>
-          <Link to="/buyer/requests/new">ثبت درخواست خرید</Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" asChild>
+            <Link to="/buyer/reorder">سفارش مجدد</Link>
+          </Button>
+          <Button asChild>
+            <Link to="/buyer/requests/new">ثبت درخواست خرید</Link>
+          </Button>
+        </div>
       }
     >
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
