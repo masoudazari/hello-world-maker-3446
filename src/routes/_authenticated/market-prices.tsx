@@ -1,13 +1,27 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Search } from "lucide-react";
+import { ExternalLink, Search } from "lucide-react";
 import { PanelShell } from "@/components/layout/PanelShell";
 import { EmptyState } from "@/components/common/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+
+const DIVAR_CITIES = [
+  { slug: "tehran", label: "تهران" },
+  { slug: "mashhad", label: "مشهد" },
+  { slug: "isfahan", label: "اصفهان" },
+  { slug: "shiraz", label: "شیراز" },
+  { slug: "tabriz", label: "تبریز" },
+  { slug: "karaj", label: "کرج" },
+  { slug: "ahvaz", label: "اهواز" },
+  { slug: "qom", label: "قم" },
+  { slug: "kermanshah", label: "کرمانشاه" },
+  { slug: "rasht", label: "رشت" },
+];
 import { useAccount } from "@/lib/auth";
 import { faDate, toman } from "@/lib/format";
 
@@ -39,6 +53,7 @@ function MarketPrices() {
   const role = account?.role ?? "buyer";
   const [query, setQuery] = useState("");
   const [searchKey, setSearchKey] = useState<string | null>(null);
+  const [divarCity, setDivarCity] = useState("tehran");
 
   const collect = useMutation({
     mutationFn: async (q: string) => {
@@ -79,6 +94,44 @@ function MarketPrices() {
           {collect.isPending ? "در حال جستجو…" : "جستجو"}
         </Button>
       </div>
+
+      {query.trim() && (
+        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-border bg-secondary/20 p-3">
+          <span className="text-xs text-muted-foreground">بررسی سریع در سایت‌های دیگر (بدون استخراج خودکار قیمت):</span>
+          <Button variant="outline" size="sm" asChild>
+            <a
+              href={`https://torob.com/search/?query=${encodeURIComponent(query.trim())}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ExternalLink className="ml-2 h-3.5 w-3.5" />
+              جستجو در ترب
+            </a>
+          </Button>
+          <Select value={divarCity} onValueChange={setDivarCity}>
+            <SelectTrigger className="h-8 w-28 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {DIVAR_CITIES.map((c) => (
+                <SelectItem key={c.slug} value={c.slug}>
+                  {c.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button variant="outline" size="sm" asChild>
+            <a
+              href={`https://divar.ir/s/${divarCity}?q=${encodeURIComponent(query.trim())}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ExternalLink className="ml-2 h-3.5 w-3.5" />
+              جستجو در دیوار
+            </a>
+          </Button>
+        </div>
+      )}
 
       {hasMockData && (
         <div className="mt-4 rounded-xl border border-amber-400/40 bg-amber-400/10 p-3 text-xs text-amber-700 dark:text-amber-400">
