@@ -139,6 +139,59 @@ export type Database = {
         }
         Relationships: []
       }
+      offer_versions: {
+        Row: {
+          available_quantity: number
+          created_at: string
+          description: string | null
+          id: string
+          offer_id: string
+          payment_terms: string | null
+          preparation_time: string | null
+          shipping_cost: number
+          shipping_time: string | null
+          total_price: number
+          unit_price: number
+          version_number: number
+        }
+        Insert: {
+          available_quantity: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          offer_id: string
+          payment_terms?: string | null
+          preparation_time?: string | null
+          shipping_cost?: number
+          shipping_time?: string | null
+          total_price: number
+          unit_price: number
+          version_number: number
+        }
+        Update: {
+          available_quantity?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          offer_id?: string
+          payment_terms?: string | null
+          preparation_time?: string | null
+          shipping_cost?: number
+          shipping_time?: string | null
+          total_price?: number
+          unit_price?: number
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offer_versions_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_offers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           buyer_id: string
@@ -569,6 +622,7 @@ export type Database = {
           image_url: string | null
           is_demo: boolean
           max_price: number | null
+          max_recipients: number
           min_price: number | null
           offers_count: number
           product_id: string | null
@@ -590,6 +644,7 @@ export type Database = {
           image_url?: string | null
           is_demo?: boolean
           max_price?: number | null
+          max_recipients?: number
           min_price?: number | null
           offers_count?: number
           product_id?: string | null
@@ -611,6 +666,7 @@ export type Database = {
           image_url?: string | null
           is_demo?: boolean
           max_price?: number | null
+          max_recipients?: number
           min_price?: number | null
           offers_count?: number
           product_id?: string | null
@@ -634,6 +690,129 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      request_conversations: {
+        Row: {
+          buyer_id: string
+          created_at: string
+          id: string
+          request_id: string
+          supplier_id: string
+        }
+        Insert: {
+          buyer_id: string
+          created_at?: string
+          id?: string
+          request_id: string
+          supplier_id: string
+        }
+        Update: {
+          buyer_id?: string
+          created_at?: string
+          id?: string
+          request_id?: string
+          supplier_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "request_conversations_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_conversations_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      request_messages: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string
+          request_id: string
+          sender_id: string
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message: string
+          request_id: string
+          sender_id: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          request_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "request_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "request_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_messages_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      request_recipients: {
+        Row: {
+          id: string
+          match_score: number
+          notified_at: string
+          request_id: string
+          supplier_id: string
+        }
+        Insert: {
+          id?: string
+          match_score?: number
+          notified_at?: string
+          request_id: string
+          supplier_id: string
+        }
+        Update: {
+          id?: string
+          match_score?: number
+          notified_at?: string
+          request_id?: string
+          supplier_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "request_recipients_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_recipients_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
             referencedColumns: ["id"]
           },
         ]
