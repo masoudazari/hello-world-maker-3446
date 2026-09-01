@@ -615,6 +615,70 @@ export type Database = {
         }
         Relationships: []
       }
+      promoted_listings: {
+        Row: {
+          brand: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          note: string | null
+          product_id: string | null
+          suggested_quantity: number | null
+          supplier_id: string | null
+          title: string
+          unit: string | null
+        }
+        Insert: {
+          brand?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          note?: string | null
+          product_id?: string | null
+          suggested_quantity?: number | null
+          supplier_id?: string | null
+          title: string
+          unit?: string | null
+        }
+        Update: {
+          brand?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          note?: string | null
+          product_id?: string | null
+          suggested_quantity?: number | null
+          supplier_id?: string | null
+          title?: string
+          unit?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promoted_listings_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "product_market_stats"
+            referencedColumns: ["product_id"]
+          },
+          {
+            foreignKeyName: "promoted_listings_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promoted_listings_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       promotions: {
         Row: {
           category_id: string | null
@@ -1201,6 +1265,19 @@ export type Database = {
       }
     }
     Views: {
+      buyer_reorder_patterns: {
+        Row: {
+          avg_interval_days: number | null
+          buyer_id: string | null
+          first_ordered_at: string | null
+          last_ordered_at: string | null
+          order_count: number | null
+          product_name: string | null
+          typical_quantity: number | null
+          unit: string | null
+        }
+        Relationships: []
+      }
       product_market_stats: {
         Row: {
           includes_mock_data: boolean | null
