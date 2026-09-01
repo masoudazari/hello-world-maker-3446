@@ -108,6 +108,16 @@ function MarketPrices() {
               جستجو در ترب
             </a>
           </Button>
+          <Button variant="outline" size="sm" asChild>
+            <a
+              href={`https://www.digikala.com/search/?q=${encodeURIComponent(query.trim())}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ExternalLink className="ml-2 h-3.5 w-3.5" />
+              جستجو در دیجی‌کالا
+            </a>
+          </Button>
           <Select value={divarCity} onValueChange={setDivarCity}>
             <SelectTrigger className="h-8 w-28 text-xs">
               <SelectValue />
