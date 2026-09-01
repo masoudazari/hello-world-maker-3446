@@ -55,6 +55,62 @@ export type Database = {
           },
         ]
       }
+      market_prices: {
+        Row: {
+          brand: string | null
+          created_at: string
+          fetched_at: string
+          id: string
+          in_stock: boolean | null
+          is_mock: boolean
+          price: number
+          product_name: string
+          product_url: string | null
+          search_key: string
+          seller_name: string | null
+          source_id: string
+          variant: string | null
+        }
+        Insert: {
+          brand?: string | null
+          created_at?: string
+          fetched_at?: string
+          id?: string
+          in_stock?: boolean | null
+          is_mock?: boolean
+          price: number
+          product_name: string
+          product_url?: string | null
+          search_key: string
+          seller_name?: string | null
+          source_id: string
+          variant?: string | null
+        }
+        Update: {
+          brand?: string | null
+          created_at?: string
+          fetched_at?: string
+          id?: string
+          in_stock?: boolean | null
+          is_mock?: boolean
+          price?: number
+          product_name?: string
+          product_url?: string | null
+          search_key?: string
+          seller_name?: string | null
+          source_id?: string
+          variant?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_prices_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "price_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           attachment_url: string | null
@@ -271,6 +327,39 @@ export type Database = {
           },
         ]
       }
+      price_sources: {
+        Row: {
+          base_url: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          is_mock: boolean
+          name: string
+          notes: string | null
+          slug: string
+        }
+        Insert: {
+          base_url?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_mock?: boolean
+          name: string
+          notes?: string | null
+          slug: string
+        }
+        Update: {
+          base_url?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_mock?: boolean
+          name?: string
+          notes?: string | null
+          slug?: string
+        }
+        Relationships: []
+      }
       product_images: {
         Row: {
           id: string
@@ -291,6 +380,13 @@ export type Database = {
           sort_order?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "product_images_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "product_market_stats"
+            referencedColumns: ["product_id"]
+          },
           {
             foreignKeyName: "product_images_product_id_fkey"
             columns: ["product_id"]
@@ -333,6 +429,13 @@ export type Database = {
             foreignKeyName: "product_price_history_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
+            referencedRelation: "product_market_stats"
+            referencedColumns: ["product_id"]
+          },
+          {
+            foreignKeyName: "product_price_history_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
             referencedRelation: "products"
             referencedColumns: ["id"]
           },
@@ -361,6 +464,13 @@ export type Database = {
           unit_price?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "product_prices_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "product_market_stats"
+            referencedColumns: ["product_id"]
+          },
           {
             foreignKeyName: "product_prices_product_id_fkey"
             columns: ["product_id"]
@@ -560,6 +670,13 @@ export type Database = {
             foreignKeyName: "promotions_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
+            referencedRelation: "product_market_stats"
+            referencedColumns: ["product_id"]
+          },
+          {
+            foreignKeyName: "promotions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
             referencedRelation: "products"
             referencedColumns: ["id"]
           },
@@ -684,6 +801,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "categories"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_requests_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "product_market_stats"
+            referencedColumns: ["product_id"]
           },
           {
             foreignKeyName: "purchase_requests_product_id_fkey"
@@ -1077,6 +1201,28 @@ export type Database = {
       }
     }
     Views: {
+      product_market_stats: {
+        Row: {
+          includes_mock_data: boolean | null
+          last_checked_at: string | null
+          market_avg: number | null
+          market_max: number | null
+          market_min: number | null
+          my_price: number | null
+          product_id: string | null
+          sample_count: number | null
+          supplier_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       supplier_customer_summary: {
         Row: {
           buyer_id: string | null
