@@ -18,6 +18,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as AuthenticatedMarketPricesRouteImport } from './routes/_authenticated/market-prices'
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as ProductsIndexRouteImport } from './routes/products.index'
@@ -28,10 +29,14 @@ import { Route as SuppliersIndexRouteImport } from './routes/suppliers.index'
 import { Route as SuppliersIdRouteImport } from './routes/suppliers.$id'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated/admin.products'
+import { Route as AuthenticatedAdminPromotionsRouteImport } from './routes/_authenticated/admin.promotions'
 import { Route as AuthenticatedAdminRequestsRouteImport } from './routes/_authenticated/admin.requests'
 import { Route as AuthenticatedAdminSuppliersRouteImport } from './routes/_authenticated/admin.suppliers'
 import { Route as AuthenticatedBuyerDashboardRouteImport } from './routes/_authenticated/buyer.dashboard'
 import { Route as AuthenticatedBuyerOrdersRouteImport } from './routes/_authenticated/buyer.orders'
+import { Route as AuthenticatedBuyerReorderRouteImport } from './routes/_authenticated/buyer.reorder'
+import { Route as AuthenticatedSupplierBulkPricingRouteImport } from './routes/_authenticated/supplier.bulk-pricing'
+import { Route as AuthenticatedSupplierCustomersRouteImport } from './routes/_authenticated/supplier.customers'
 import { Route as AuthenticatedSupplierDashboardRouteImport } from './routes/_authenticated/supplier.dashboard'
 import { Route as AuthenticatedSupplierOffersRouteImport } from './routes/_authenticated/supplier.offers'
 import { Route as AuthenticatedSupplierOrdersRouteImport } from './routes/_authenticated/supplier.orders'
@@ -86,6 +91,12 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedMarketPricesRoute =
+  AuthenticatedMarketPricesRouteImport.update({
+    id: '/market-prices',
+    path: '/market-prices',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedMessagesRoute = AuthenticatedMessagesRouteImport.update({
   id: '/messages',
   path: '/messages',
@@ -138,6 +149,12 @@ const AuthenticatedAdminProductsRoute =
     path: '/admin/products',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminPromotionsRoute =
+  AuthenticatedAdminPromotionsRouteImport.update({
+    id: '/admin/promotions',
+    path: '/admin/promotions',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminRequestsRoute =
   AuthenticatedAdminRequestsRouteImport.update({
     id: '/admin/requests',
@@ -160,6 +177,24 @@ const AuthenticatedBuyerOrdersRoute =
   AuthenticatedBuyerOrdersRouteImport.update({
     id: '/buyer/orders',
     path: '/buyer/orders',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedBuyerReorderRoute =
+  AuthenticatedBuyerReorderRouteImport.update({
+    id: '/buyer/reorder',
+    path: '/buyer/reorder',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedSupplierBulkPricingRoute =
+  AuthenticatedSupplierBulkPricingRouteImport.update({
+    id: '/supplier/bulk-pricing',
+    path: '/supplier/bulk-pricing',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedSupplierCustomersRoute =
+  AuthenticatedSupplierCustomersRouteImport.update({
+    id: '/supplier/customers',
+    path: '/supplier/customers',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedSupplierDashboardRoute =
@@ -226,6 +261,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
   '/terms': typeof TermsRoute
+  '/market-prices': typeof AuthenticatedMarketPricesRoute
   '/messages': typeof AuthenticatedMessagesRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/products/$slug': typeof ProductsSlugRoute
@@ -235,10 +271,14 @@ export interface FileRoutesByFullPath {
   '/purchase-requests/': typeof PurchaseRequestsIndexRoute
   '/suppliers/': typeof SuppliersIndexRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
+  '/admin/promotions': typeof AuthenticatedAdminPromotionsRoute
   '/admin/requests': typeof AuthenticatedAdminRequestsRoute
   '/admin/suppliers': typeof AuthenticatedAdminSuppliersRoute
   '/buyer/dashboard': typeof AuthenticatedBuyerDashboardRoute
   '/buyer/orders': typeof AuthenticatedBuyerOrdersRoute
+  '/buyer/reorder': typeof AuthenticatedBuyerReorderRoute
+  '/supplier/bulk-pricing': typeof AuthenticatedSupplierBulkPricingRoute
+  '/supplier/customers': typeof AuthenticatedSupplierCustomersRoute
   '/supplier/dashboard': typeof AuthenticatedSupplierDashboardRoute
   '/supplier/offers': typeof AuthenticatedSupplierOffersRoute
   '/supplier/orders': typeof AuthenticatedSupplierOrdersRoute
@@ -259,6 +299,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
   '/terms': typeof TermsRoute
+  '/market-prices': typeof AuthenticatedMarketPricesRoute
   '/messages': typeof AuthenticatedMessagesRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/products/$slug': typeof ProductsSlugRoute
@@ -268,10 +309,14 @@ export interface FileRoutesByTo {
   '/purchase-requests': typeof PurchaseRequestsIndexRoute
   '/suppliers': typeof SuppliersIndexRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
+  '/admin/promotions': typeof AuthenticatedAdminPromotionsRoute
   '/admin/requests': typeof AuthenticatedAdminRequestsRoute
   '/admin/suppliers': typeof AuthenticatedAdminSuppliersRoute
   '/buyer/dashboard': typeof AuthenticatedBuyerDashboardRoute
   '/buyer/orders': typeof AuthenticatedBuyerOrdersRoute
+  '/buyer/reorder': typeof AuthenticatedBuyerReorderRoute
+  '/supplier/bulk-pricing': typeof AuthenticatedSupplierBulkPricingRoute
+  '/supplier/customers': typeof AuthenticatedSupplierCustomersRoute
   '/supplier/dashboard': typeof AuthenticatedSupplierDashboardRoute
   '/supplier/offers': typeof AuthenticatedSupplierOffersRoute
   '/supplier/orders': typeof AuthenticatedSupplierOrdersRoute
@@ -294,6 +339,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
   '/terms': typeof TermsRoute
+  '/_authenticated/market-prices': typeof AuthenticatedMarketPricesRoute
   '/_authenticated/messages': typeof AuthenticatedMessagesRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/products/$slug': typeof ProductsSlugRoute
@@ -303,10 +349,14 @@ export interface FileRoutesById {
   '/purchase-requests/': typeof PurchaseRequestsIndexRoute
   '/suppliers/': typeof SuppliersIndexRoute
   '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRoute
+  '/_authenticated/admin/promotions': typeof AuthenticatedAdminPromotionsRoute
   '/_authenticated/admin/requests': typeof AuthenticatedAdminRequestsRoute
   '/_authenticated/admin/suppliers': typeof AuthenticatedAdminSuppliersRoute
   '/_authenticated/buyer/dashboard': typeof AuthenticatedBuyerDashboardRoute
   '/_authenticated/buyer/orders': typeof AuthenticatedBuyerOrdersRoute
+  '/_authenticated/buyer/reorder': typeof AuthenticatedBuyerReorderRoute
+  '/_authenticated/supplier/bulk-pricing': typeof AuthenticatedSupplierBulkPricingRoute
+  '/_authenticated/supplier/customers': typeof AuthenticatedSupplierCustomersRoute
   '/_authenticated/supplier/dashboard': typeof AuthenticatedSupplierDashboardRoute
   '/_authenticated/supplier/offers': typeof AuthenticatedSupplierOffersRoute
   '/_authenticated/supplier/orders': typeof AuthenticatedSupplierOrdersRoute
@@ -329,6 +379,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/register'
     | '/terms'
+    | '/market-prices'
     | '/messages'
     | '/notifications'
     | '/products/$slug'
@@ -338,10 +389,14 @@ export interface FileRouteTypes {
     | '/purchase-requests/'
     | '/suppliers/'
     | '/admin/products'
+    | '/admin/promotions'
     | '/admin/requests'
     | '/admin/suppliers'
     | '/buyer/dashboard'
     | '/buyer/orders'
+    | '/buyer/reorder'
+    | '/supplier/bulk-pricing'
+    | '/supplier/customers'
     | '/supplier/dashboard'
     | '/supplier/offers'
     | '/supplier/orders'
@@ -362,6 +417,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/register'
     | '/terms'
+    | '/market-prices'
     | '/messages'
     | '/notifications'
     | '/products/$slug'
@@ -371,10 +427,14 @@ export interface FileRouteTypes {
     | '/purchase-requests'
     | '/suppliers'
     | '/admin/products'
+    | '/admin/promotions'
     | '/admin/requests'
     | '/admin/suppliers'
     | '/buyer/dashboard'
     | '/buyer/orders'
+    | '/buyer/reorder'
+    | '/supplier/bulk-pricing'
+    | '/supplier/customers'
     | '/supplier/dashboard'
     | '/supplier/offers'
     | '/supplier/orders'
@@ -396,6 +456,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/register'
     | '/terms'
+    | '/_authenticated/market-prices'
     | '/_authenticated/messages'
     | '/_authenticated/notifications'
     | '/products/$slug'
@@ -405,10 +466,14 @@ export interface FileRouteTypes {
     | '/purchase-requests/'
     | '/suppliers/'
     | '/_authenticated/admin/products'
+    | '/_authenticated/admin/promotions'
     | '/_authenticated/admin/requests'
     | '/_authenticated/admin/suppliers'
     | '/_authenticated/buyer/dashboard'
     | '/_authenticated/buyer/orders'
+    | '/_authenticated/buyer/reorder'
+    | '/_authenticated/supplier/bulk-pricing'
+    | '/_authenticated/supplier/customers'
     | '/_authenticated/supplier/dashboard'
     | '/_authenticated/supplier/offers'
     | '/_authenticated/supplier/orders'
@@ -504,6 +569,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/market-prices': {
+      id: '/_authenticated/market-prices'
+      path: '/market-prices'
+      fullPath: '/market-prices'
+      preLoaderRoute: typeof AuthenticatedMarketPricesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/messages': {
       id: '/_authenticated/messages'
       path: '/messages'
@@ -574,6 +646,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminProductsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/promotions': {
+      id: '/_authenticated/admin/promotions'
+      path: '/admin/promotions'
+      fullPath: '/admin/promotions'
+      preLoaderRoute: typeof AuthenticatedAdminPromotionsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/requests': {
       id: '/_authenticated/admin/requests'
       path: '/admin/requests'
@@ -600,6 +679,27 @@ declare module '@tanstack/react-router' {
       path: '/buyer/orders'
       fullPath: '/buyer/orders'
       preLoaderRoute: typeof AuthenticatedBuyerOrdersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/buyer/reorder': {
+      id: '/_authenticated/buyer/reorder'
+      path: '/buyer/reorder'
+      fullPath: '/buyer/reorder'
+      preLoaderRoute: typeof AuthenticatedBuyerReorderRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/supplier/bulk-pricing': {
+      id: '/_authenticated/supplier/bulk-pricing'
+      path: '/supplier/bulk-pricing'
+      fullPath: '/supplier/bulk-pricing'
+      preLoaderRoute: typeof AuthenticatedSupplierBulkPricingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/supplier/customers': {
+      id: '/_authenticated/supplier/customers'
+      path: '/supplier/customers'
+      fullPath: '/supplier/customers'
+      preLoaderRoute: typeof AuthenticatedSupplierCustomersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/supplier/dashboard': {
@@ -669,13 +769,18 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedMarketPricesRoute: typeof AuthenticatedMarketPricesRoute
   AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedAdminProductsRoute: typeof AuthenticatedAdminProductsRoute
+  AuthenticatedAdminPromotionsRoute: typeof AuthenticatedAdminPromotionsRoute
   AuthenticatedAdminRequestsRoute: typeof AuthenticatedAdminRequestsRoute
   AuthenticatedAdminSuppliersRoute: typeof AuthenticatedAdminSuppliersRoute
   AuthenticatedBuyerDashboardRoute: typeof AuthenticatedBuyerDashboardRoute
   AuthenticatedBuyerOrdersRoute: typeof AuthenticatedBuyerOrdersRoute
+  AuthenticatedBuyerReorderRoute: typeof AuthenticatedBuyerReorderRoute
+  AuthenticatedSupplierBulkPricingRoute: typeof AuthenticatedSupplierBulkPricingRoute
+  AuthenticatedSupplierCustomersRoute: typeof AuthenticatedSupplierCustomersRoute
   AuthenticatedSupplierDashboardRoute: typeof AuthenticatedSupplierDashboardRoute
   AuthenticatedSupplierOffersRoute: typeof AuthenticatedSupplierOffersRoute
   AuthenticatedSupplierOrdersRoute: typeof AuthenticatedSupplierOrdersRoute
@@ -689,13 +794,18 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedMarketPricesRoute: AuthenticatedMarketPricesRoute,
   AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedAdminProductsRoute: AuthenticatedAdminProductsRoute,
+  AuthenticatedAdminPromotionsRoute: AuthenticatedAdminPromotionsRoute,
   AuthenticatedAdminRequestsRoute: AuthenticatedAdminRequestsRoute,
   AuthenticatedAdminSuppliersRoute: AuthenticatedAdminSuppliersRoute,
   AuthenticatedBuyerDashboardRoute: AuthenticatedBuyerDashboardRoute,
   AuthenticatedBuyerOrdersRoute: AuthenticatedBuyerOrdersRoute,
+  AuthenticatedBuyerReorderRoute: AuthenticatedBuyerReorderRoute,
+  AuthenticatedSupplierBulkPricingRoute: AuthenticatedSupplierBulkPricingRoute,
+  AuthenticatedSupplierCustomersRoute: AuthenticatedSupplierCustomersRoute,
   AuthenticatedSupplierDashboardRoute: AuthenticatedSupplierDashboardRoute,
   AuthenticatedSupplierOffersRoute: AuthenticatedSupplierOffersRoute,
   AuthenticatedSupplierOrdersRoute: AuthenticatedSupplierOrdersRoute,
