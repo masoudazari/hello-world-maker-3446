@@ -922,7 +922,14 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      bulk_update_product_prices: {
+        Args: { _mode: string; _product_ids: string[]; _value: number }
+        Returns: {
+          new_price: number
+          old_price: number
+          product_id: string
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "buyer" | "supplier"
