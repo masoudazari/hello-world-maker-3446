@@ -142,36 +142,57 @@ export type Database = {
       orders: {
         Row: {
           buyer_id: string
+          buyer_name_snapshot: string | null
+          buyer_phone_snapshot: string | null
           created_at: string
+          discount_amount: number
           id: string
+          invoice_number: number
           offer_id: string | null
+          product_name_snapshot: string | null
           quantity: number
           request_id: string | null
           status: string
           supplier_id: string
           total_amount: number
+          unit_price_snapshot: number
+          unit_snapshot: string | null
         }
         Insert: {
           buyer_id: string
+          buyer_name_snapshot?: string | null
+          buyer_phone_snapshot?: string | null
           created_at?: string
+          discount_amount?: number
           id?: string
+          invoice_number?: number
           offer_id?: string | null
+          product_name_snapshot?: string | null
           quantity?: number
           request_id?: string | null
           status?: string
           supplier_id: string
           total_amount?: number
+          unit_price_snapshot?: number
+          unit_snapshot?: string | null
         }
         Update: {
           buyer_id?: string
+          buyer_name_snapshot?: string | null
+          buyer_phone_snapshot?: string | null
           created_at?: string
+          discount_amount?: number
           id?: string
+          invoice_number?: number
           offer_id?: string | null
+          product_name_snapshot?: string | null
           quantity?: number
           request_id?: string | null
           status?: string
           supplier_id?: string
           total_amount?: number
+          unit_price_snapshot?: number
+          unit_snapshot?: string | null
         }
         Relationships: [
           {
@@ -219,6 +240,44 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "product_images_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_price_history: {
+        Row: {
+          change_percent: number
+          changed_by: string | null
+          created_at: string
+          id: string
+          new_price: number
+          old_price: number
+          product_id: string
+        }
+        Insert: {
+          change_percent?: number
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_price: number
+          old_price: number
+          product_id: string
+        }
+        Update: {
+          change_percent?: number
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_price?: number
+          old_price?: number
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_price_history_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
@@ -839,7 +898,28 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      supplier_customer_summary: {
+        Row: {
+          buyer_id: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          first_purchase_at: string | null
+          last_purchase_at: string | null
+          orders_count: number | null
+          supplier_id: string | null
+          total_items: number | null
+          total_spent: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       [_ in never]: never
