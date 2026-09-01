@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.15"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -51,6 +51,62 @@ export type Database = {
             columns: ["parent_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      market_prices: {
+        Row: {
+          brand: string | null
+          created_at: string
+          fetched_at: string
+          id: string
+          in_stock: boolean | null
+          is_mock: boolean
+          price: number
+          product_name: string
+          product_url: string | null
+          search_key: string
+          seller_name: string | null
+          source_id: string
+          variant: string | null
+        }
+        Insert: {
+          brand?: string | null
+          created_at?: string
+          fetched_at?: string
+          id?: string
+          in_stock?: boolean | null
+          is_mock?: boolean
+          price: number
+          product_name: string
+          product_url?: string | null
+          search_key: string
+          seller_name?: string | null
+          source_id: string
+          variant?: string | null
+        }
+        Update: {
+          brand?: string | null
+          created_at?: string
+          fetched_at?: string
+          id?: string
+          in_stock?: boolean | null
+          is_mock?: boolean
+          price?: number
+          product_name?: string
+          product_url?: string | null
+          search_key?: string
+          seller_name?: string | null
+          source_id?: string
+          variant?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_prices_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "price_sources"
             referencedColumns: ["id"]
           },
         ]
@@ -139,39 +195,113 @@ export type Database = {
         }
         Relationships: []
       }
+      offer_versions: {
+        Row: {
+          available_quantity: number
+          created_at: string
+          description: string | null
+          id: string
+          offer_id: string
+          payment_terms: string | null
+          preparation_time: string | null
+          shipping_cost: number
+          shipping_time: string | null
+          total_price: number
+          unit_price: number
+          version_number: number
+        }
+        Insert: {
+          available_quantity: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          offer_id: string
+          payment_terms?: string | null
+          preparation_time?: string | null
+          shipping_cost?: number
+          shipping_time?: string | null
+          total_price: number
+          unit_price: number
+          version_number: number
+        }
+        Update: {
+          available_quantity?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          offer_id?: string
+          payment_terms?: string | null
+          preparation_time?: string | null
+          shipping_cost?: number
+          shipping_time?: string | null
+          total_price?: number
+          unit_price?: number
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offer_versions_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_offers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           buyer_id: string
+          buyer_name_snapshot: string | null
+          buyer_phone_snapshot: string | null
           created_at: string
+          discount_amount: number
           id: string
+          invoice_number: number
           offer_id: string | null
+          product_name_snapshot: string | null
           quantity: number
           request_id: string | null
           status: string
           supplier_id: string
           total_amount: number
+          unit_price_snapshot: number
+          unit_snapshot: string | null
         }
         Insert: {
           buyer_id: string
+          buyer_name_snapshot?: string | null
+          buyer_phone_snapshot?: string | null
           created_at?: string
+          discount_amount?: number
           id?: string
+          invoice_number?: number
           offer_id?: string | null
+          product_name_snapshot?: string | null
           quantity?: number
           request_id?: string | null
           status?: string
           supplier_id: string
           total_amount?: number
+          unit_price_snapshot?: number
+          unit_snapshot?: string | null
         }
         Update: {
           buyer_id?: string
+          buyer_name_snapshot?: string | null
+          buyer_phone_snapshot?: string | null
           created_at?: string
+          discount_amount?: number
           id?: string
+          invoice_number?: number
           offer_id?: string | null
+          product_name_snapshot?: string | null
           quantity?: number
           request_id?: string | null
           status?: string
           supplier_id?: string
           total_amount?: number
+          unit_price_snapshot?: number
+          unit_snapshot?: string | null
         }
         Relationships: [
           {
@@ -197,6 +327,39 @@ export type Database = {
           },
         ]
       }
+      price_sources: {
+        Row: {
+          base_url: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          is_mock: boolean
+          name: string
+          notes: string | null
+          slug: string
+        }
+        Insert: {
+          base_url?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_mock?: boolean
+          name: string
+          notes?: string | null
+          slug: string
+        }
+        Update: {
+          base_url?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_mock?: boolean
+          name?: string
+          notes?: string | null
+          slug?: string
+        }
+        Relationships: []
+      }
       product_images: {
         Row: {
           id: string
@@ -219,6 +382,58 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "product_images_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "product_market_stats"
+            referencedColumns: ["product_id"]
+          },
+          {
+            foreignKeyName: "product_images_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_price_history: {
+        Row: {
+          change_percent: number
+          changed_by: string | null
+          created_at: string
+          id: string
+          new_price: number
+          old_price: number
+          product_id: string
+        }
+        Insert: {
+          change_percent?: number
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_price: number
+          old_price: number
+          product_id: string
+        }
+        Update: {
+          change_percent?: number
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_price?: number
+          old_price?: number
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_price_history_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "product_market_stats"
+            referencedColumns: ["product_id"]
+          },
+          {
+            foreignKeyName: "product_price_history_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
@@ -249,6 +464,13 @@ export type Database = {
           unit_price?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "product_prices_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "product_market_stats"
+            referencedColumns: ["product_id"]
+          },
           {
             foreignKeyName: "product_prices_product_id_fkey"
             columns: ["product_id"]
@@ -393,6 +615,70 @@ export type Database = {
         }
         Relationships: []
       }
+      promoted_listings: {
+        Row: {
+          brand: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          note: string | null
+          product_id: string | null
+          suggested_quantity: number | null
+          supplier_id: string | null
+          title: string
+          unit: string | null
+        }
+        Insert: {
+          brand?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          note?: string | null
+          product_id?: string | null
+          suggested_quantity?: number | null
+          supplier_id?: string | null
+          title: string
+          unit?: string | null
+        }
+        Update: {
+          brand?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          note?: string | null
+          product_id?: string | null
+          suggested_quantity?: number | null
+          supplier_id?: string | null
+          title?: string
+          unit?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promoted_listings_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "product_market_stats"
+            referencedColumns: ["product_id"]
+          },
+          {
+            foreignKeyName: "promoted_listings_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promoted_listings_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       promotions: {
         Row: {
           category_id: string | null
@@ -443,6 +729,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "categories"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "product_market_stats"
+            referencedColumns: ["product_id"]
           },
           {
             foreignKeyName: "promotions_product_id_fkey"
@@ -510,6 +803,7 @@ export type Database = {
           image_url: string | null
           is_demo: boolean
           max_price: number | null
+          max_recipients: number
           min_price: number | null
           offers_count: number
           product_id: string | null
@@ -531,6 +825,7 @@ export type Database = {
           image_url?: string | null
           is_demo?: boolean
           max_price?: number | null
+          max_recipients?: number
           min_price?: number | null
           offers_count?: number
           product_id?: string | null
@@ -552,6 +847,7 @@ export type Database = {
           image_url?: string | null
           is_demo?: boolean
           max_price?: number | null
+          max_recipients?: number
           min_price?: number | null
           offers_count?: number
           product_id?: string | null
@@ -574,7 +870,137 @@ export type Database = {
             foreignKeyName: "purchase_requests_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
+            referencedRelation: "product_market_stats"
+            referencedColumns: ["product_id"]
+          },
+          {
+            foreignKeyName: "purchase_requests_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      request_conversations: {
+        Row: {
+          buyer_id: string
+          created_at: string
+          id: string
+          request_id: string
+          supplier_id: string
+        }
+        Insert: {
+          buyer_id: string
+          created_at?: string
+          id?: string
+          request_id: string
+          supplier_id: string
+        }
+        Update: {
+          buyer_id?: string
+          created_at?: string
+          id?: string
+          request_id?: string
+          supplier_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "request_conversations_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_conversations_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      request_messages: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string
+          request_id: string
+          sender_id: string
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message: string
+          request_id: string
+          sender_id: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          request_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "request_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "request_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_messages_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      request_recipients: {
+        Row: {
+          id: string
+          match_score: number
+          notified_at: string
+          request_id: string
+          supplier_id: string
+        }
+        Insert: {
+          id?: string
+          match_score?: number
+          notified_at?: string
+          request_id: string
+          supplier_id: string
+        }
+        Update: {
+          id?: string
+          match_score?: number
+          notified_at?: string
+          request_id?: string
+          supplier_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "request_recipients_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_recipients_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
             referencedColumns: ["id"]
           },
         ]
@@ -839,10 +1265,73 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      buyer_reorder_patterns: {
+        Row: {
+          avg_interval_days: number | null
+          buyer_id: string | null
+          first_ordered_at: string | null
+          last_ordered_at: string | null
+          order_count: number | null
+          product_name: string | null
+          typical_quantity: number | null
+          unit: string | null
+        }
+        Relationships: []
+      }
+      product_market_stats: {
+        Row: {
+          includes_mock_data: boolean | null
+          last_checked_at: string | null
+          market_avg: number | null
+          market_max: number | null
+          market_min: number | null
+          my_price: number | null
+          product_id: string | null
+          sample_count: number | null
+          supplier_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supplier_customer_summary: {
+        Row: {
+          buyer_id: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          first_purchase_at: string | null
+          last_purchase_at: string | null
+          orders_count: number | null
+          supplier_id: string | null
+          total_items: number | null
+          total_spent: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
-      [_ in never]: never
+      bulk_update_product_prices: {
+        Args: { _mode: string; _product_ids: string[]; _value: number }
+        Returns: {
+          new_price: number
+          old_price: number
+          product_id: string
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "buyer" | "supplier"
