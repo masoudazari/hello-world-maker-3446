@@ -37,7 +37,14 @@ type OrderRow = {
   status: string;
 };
 
-function matchesFilter(row: OrderRow, q: string) {
+type FilterableRow = {
+  buyer_name_snapshot?: string | null;
+  buyer_phone_snapshot?: string | null;
+  product_name_snapshot?: string | null;
+  invoice_number?: number | null;
+};
+
+function matchesFilter(row: FilterableRow, q: string) {
   if (!q.trim()) return true;
   const needle = q.trim().toLowerCase();
   return (
