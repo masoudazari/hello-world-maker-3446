@@ -187,9 +187,34 @@ function ProductDialog({ supplierId }: { supplierId: string }) {
   });
 
   const referenceQuery = `${form.name} ${form.brand}`.trim();
-  const { data: suggestedPrice } = useQuery({
-    queryKey: ["reference-price-suggestion", referenceQuery],
+
+  // Prefer a real, live price from another supplier already selling a
+  // matching product on the site (e.g. "فروشنده X پپسی را 50,000 گذاشته")
+  // — this needs zero manual admin work and is always current. Only if
+  // nothing matches on-site do we fall back to the admin-curated
+  // reference_prices table.
+  const { data: ownSitePrice } = useQuery({
+    queryKey: ["own-site-price-suggestion", referenceQuery],
     enabled: referenceQuery.length >= 3,
+    queryFn: async () => {
+      const variants = getSearchVariants(referenceQuery);
+      if (variants.length === 0) return null;
+      const orClauses = variants.flatMap((term) => [`name.ilike.%${term}%`, `brand.ilike.%${term}%`]);
+      const { data } = await supabase
+        .from("products")
+        .select("base_price, unit, suppliers(company_name)")
+        .eq("status", "active")
+        .or(orClauses.join(","))
+        .order("base_price", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      return data;
+    },
+  });
+
+  const { data: manualReferencePrice } = useQuery({
+    queryKey: ["reference-price-suggestion", referenceQuery],
+    enabled: referenceQuery.length >= 3 && !ownSitePrice,
     queryFn: async () => {
       const variants = getSearchVariants(referenceQuery);
       if (variants.length === 0) return null;
@@ -203,6 +228,12 @@ function ProductDialog({ supplierId }: { supplierId: string }) {
       return data;
     },
   });
+
+  const suggestedPrice = ownSitePrice
+    ? { approx_price: ownSitePrice.base_price, unit: ownSitePrice.unit, source: ownSitePrice.suppliers?.company_name }
+    : manualReferencePrice
+      ? { approx_price: manualReferencePrice.approx_price, unit: manualReferencePrice.unit, source: null }
+      : null;
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -270,7 +301,8 @@ function ProductDialog({ supplierId }: { supplierId: string }) {
                 onClick={() => setForm((f) => ({ ...f, base_price: String(suggestedPrice.approx_price) }))}
                 className="mt-1.5 block text-xs text-primary underline underline-offset-2"
               >
-                قیمت مرجع تقریبی: {toman(suggestedPrice.approx_price)} / {suggestedPrice.unit} (برای استفاده کلیک کنید)
+                قیمت مرجع تقریبی: {toman(suggestedPrice.approx_price)} / {suggestedPrice.unit}
+                {suggestedPrice.source ? ` (${suggestedPrice.source} همین کالا را دارد)` : ""} (برای استفاده کلیک کنید)
               </button>
             )}
           </div>

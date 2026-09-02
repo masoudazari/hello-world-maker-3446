@@ -2,6 +2,7 @@ import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { Plus, Trash2 } from "lucide-react";
 import { PanelShell } from "@/components/layout/PanelShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +14,8 @@ import { useAccount } from "@/lib/auth";
 import { CITIES, QUALITY_LEVELS, TIMEFRAMES, UNITS } from "@/lib/constants";
 import { parseNeed } from "@/lib/parse-need";
 import { cleanSearch } from "@/lib/search";
-
+import { getSearchVariants } from "@/lib/bilingual-search";
+import { toman } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/buyer/requests/new")({
   validateSearch: (search: Record<string, unknown>): { need?: string | undefined } =>
@@ -29,6 +31,18 @@ export const Route = createFileRoute("/_authenticated/buyer/requests/new")({
   component: NewRequestPage,
 });
 
+type ItemRow = {
+  key: string;
+  product_name: string;
+  category_id: string;
+  quantity: string;
+  unit: string;
+};
+
+function newItem(product_name = "", quantity = "", unit = "عدد"): ItemRow {
+  return { key: crypto.randomUUID(), product_name, category_id: "", quantity, unit };
+}
+
 function NewRequestPage() {
   const { data: account } = useAccount();
   const navigate = useNavigate();
@@ -37,11 +51,11 @@ function NewRequestPage() {
   const parsed = parseNeed(need ?? "");
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  const [form, setForm] = useState({
-    product_name: parsed.productName,
-    category_id: "",
-    quantity: parsed.quantity ? String(parsed.quantity) : "",
-    unit: parsed.unit ?? "عدد",
+  const [items, setItems] = useState<ItemRow[]>([
+    newItem(parsed.productName, parsed.quantity ? String(parsed.quantity) : "", parsed.unit ?? "عدد"),
+  ]);
+
+  const [shared, setShared] = useState({
     quality: "any",
     delivery_city: "تهران",
     required_date: "flexible",
@@ -49,7 +63,6 @@ function NewRequestPage() {
     max_price: "",
     description: "",
   });
-
 
   const { data: categories = [] } = useQuery({
     queryKey: ["categories-flat"],
@@ -59,128 +72,240 @@ function NewRequestPage() {
     },
   });
 
+  function updateItem(key: string, patch: Partial<ItemRow>) {
+    setItems((rows) => rows.map((r) => (r.key === key ? { ...r, ...patch } : r)));
+  }
+  function addItem() {
+    setItems((rows) => [...rows, newItem()]);
+  }
+  function removeItem(key: string) {
+    setItems((rows) => (rows.length > 1 ? rows.filter((r) => r.key !== key) : rows));
+  }
+
   const mutation = useMutation({
     mutationFn: async () => {
       if (!account?.userId) throw new Error("ابتدا وارد حساب کاربری شوید.");
-      if (!form.product_name.trim()) throw new Error("نام کالا الزامی است.");
-      const quantity = Number(form.quantity);
-      if (!quantity || quantity <= 0) throw new Error("مقدار مورد نیاز را وارد کنید.");
+      const validItems = items.filter((i) => i.product_name.trim() && Number(i.quantity) > 0);
+      if (validItems.length === 0) throw new Error("حداقل یک قلم کالا با نام و مقدار معتبر وارد کنید.");
 
-      const { data, error } = await supabase
-        .from("purchase_requests")
-        .insert({
-          buyer_id: account.userId,
-          product_name: form.product_name.trim(),
-          category_id: form.category_id || null,
-          quantity,
-          unit: form.unit,
-          quality: form.quality,
-          delivery_city: form.delivery_city,
-          required_date: form.required_date,
-          min_price: form.min_price ? Number(form.min_price) : null,
-          max_price: form.max_price ? Number(form.max_price) : null,
-          description: form.description.trim() || null,
-          status: "matching",
-        })
-        .select("id")
-        .single();
+      const batch_id = validItems.length > 1 ? crypto.randomUUID() : null;
+
+      const rows = validItems.map((i) => ({
+        buyer_id: account.userId,
+        batch_id,
+        product_name: i.product_name.trim(),
+        category_id: i.category_id || null,
+        quantity: Number(i.quantity),
+        unit: i.unit,
+        quality: shared.quality,
+        delivery_city: shared.delivery_city,
+        required_date: shared.required_date,
+        min_price: shared.min_price ? Number(shared.min_price) : null,
+        max_price: shared.max_price ? Number(shared.max_price) : null,
+        description: shared.description.trim() || null,
+        status: "matching",
+      }));
+
+      const { data, error } = await supabase.from("purchase_requests").insert(rows).select("id");
       if (error) throw error;
-      return data;
+      return { ids: data.map((d) => d.id), batch_id };
     },
-    onSuccess: (data) => {
-      toast.success("درخواست شما ثبت شد و برای تأمین‌کنندگان ارسال می‌شود.");
+    onSuccess: ({ ids, batch_id }) => {
+      toast.success(
+        ids.length > 1
+          ? `${ids.length} درخواست خرید ثبت شد و برای تأمین‌کنندگان مرتبط ارسال می‌شود.`
+          : "درخواست شما ثبت شد و برای تأمین‌کنندگان ارسال می‌شود.",
+      );
       void queryClient.invalidateQueries({ queryKey: ["buyer-requests"] });
-      void navigate({ to: "/buyer/requests/$id", params: { id: data.id } });
+      if (batch_id) {
+        void navigate({ to: "/buyer/requests" });
+      } else {
+        void navigate({ to: "/buyer/requests/$id", params: { id: ids[0] } });
+      }
     },
     onError: (error: Error) => toast.error(error.message || "ثبت درخواست ناموفق بود."),
   });
 
-  const set = (key: keyof typeof form) => (value: string) => setForm((f) => ({ ...f, [key]: value }));
+  const set = (key: keyof typeof shared) => (value: string) => setShared((f) => ({ ...f, [key]: value }));
 
   return (
-    <PanelShell role="buyer" title="ثبت درخواست خرید" subtitle="هرچه دقیق‌تر بنویسید، پیشنهادها دقیق‌تر می‌شود.">
+    <PanelShell
+      role="buyer"
+      title="ثبت درخواست خرید"
+      subtitle="می‌توانید چند قلم کالای مختلف را در یک سفارش با هم ثبت کنید — مثلاً نوشابه، قهوه و دلستر با هم."
+    >
       <form
-        className="grid max-w-3xl gap-4 rounded-2xl border border-border bg-card p-6 md:grid-cols-2"
+        className="grid max-w-3xl gap-6"
         onSubmit={(e) => {
           e.preventDefault();
           mutation.mutate();
         }}
       >
-        <Field label="نام کالا" className="md:col-span-2">
-          <Input value={form.product_name} onChange={(e) => set("product_name")(e.target.value)} placeholder="مثلاً کوکاکولا قوطی ۳۳۰ میلی‌لیتر" />
-        </Field>
-
-        <Field label="مقدار">
-          <Input type="number" value={form.quantity} onChange={(e) => set("quantity")(e.target.value)} placeholder="۱۰۰" />
-        </Field>
-
-        <Field label="واحد">
-          <Options value={form.unit} onChange={set("unit")} options={UNITS} />
-        </Field>
-
-        <Field label="شهر تحویل">
-          <Options value={form.delivery_city} onChange={set("delivery_city")} options={CITIES.map((c) => ({ value: c, label: c }))} />
-        </Field>
-
-        <Field label="زمان نیاز">
-          <Options value={form.required_date} onChange={set("required_date")} options={TIMEFRAMES} />
-        </Field>
-
-        <div className="md:col-span-2">
-          <button
-            type="button"
-            onClick={() => setShowAdvanced((v) => !v)}
-            className="text-sm font-medium text-primary hover:underline"
-          >
-            {showAdvanced ? "بستن گزینه‌های بیشتر" : "گزینه‌های بیشتر (دسته‌بندی، کیفیت، بودجه، توضیحات)"}
-          </button>
+        <div className="grid gap-3">
+          {items.map((item, idx) => (
+            <ItemRowFields
+              key={item.key}
+              item={item}
+              index={idx}
+              canRemove={items.length > 1}
+              onChange={(patch) => updateItem(item.key, patch)}
+              onRemove={() => removeItem(item.key)}
+            />
+          ))}
+          <Button type="button" variant="outline" size="sm" onClick={addItem} className="w-fit">
+            <Plus className="ml-2 h-4 w-4" /> افزودن قلم دیگر
+          </Button>
         </div>
 
-        {showAdvanced && (
-          <>
-            <Field label="دسته‌بندی">
-              <Select value={form.category_id} onValueChange={set("category_id")}>
-                <SelectTrigger className="w-full"><SelectValue placeholder="انتخاب کنید" /></SelectTrigger>
-                <SelectContent>
-                  {categories.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
+        <div className="grid gap-4 rounded-2xl border border-border bg-card p-6 md:grid-cols-2">
+          <Field label="شهر تحویل">
+            <Options value={shared.delivery_city} onChange={set("delivery_city")} options={CITIES.map((c) => ({ value: c, label: c }))} />
+          </Field>
 
-            <Field label="کیفیت مورد نظر">
-              <Options value={form.quality} onChange={set("quality")} options={QUALITY_LEVELS} />
-            </Field>
+          <Field label="زمان نیاز">
+            <Options value={shared.required_date} onChange={set("required_date")} options={TIMEFRAMES} />
+          </Field>
 
-            <Field label="حداقل بودجه (تومان)">
-              <Input type="number" value={form.min_price} onChange={(e) => set("min_price")(e.target.value)} />
-            </Field>
+          <div className="md:col-span-2">
+            <button
+              type="button"
+              onClick={() => setShowAdvanced((v) => !v)}
+              className="text-sm font-medium text-primary hover:underline"
+            >
+              {showAdvanced ? "بستن گزینه‌های بیشتر" : "گزینه‌های بیشتر (کیفیت، بودجه، توضیحات)"}
+            </button>
+          </div>
 
-            <Field label="حداکثر بودجه (تومان)">
-              <Input type="number" value={form.max_price} onChange={(e) => set("max_price")(e.target.value)} />
-            </Field>
+          {showAdvanced && (
+            <>
+              <Field label="کیفیت مورد نظر">
+                <Options value={shared.quality} onChange={set("quality")} options={QUALITY_LEVELS} />
+              </Field>
 
-            <Field label="توضیحات" className="md:col-span-2">
-              <Textarea
-                rows={4}
-                value={form.description}
-                onChange={(e) => set("description")(e.target.value)}
-                placeholder="بسته‌بندی، برند مورد نظر، شرایط پرداخت و هر نکته مهم دیگر"
-              />
-            </Field>
-          </>
-        )}
+              <Field label="حداقل بودجه (تومان)">
+                <Input type="number" value={shared.min_price} onChange={(e) => set("min_price")(e.target.value)} />
+              </Field>
 
+              <Field label="حداکثر بودجه (تومان)">
+                <Input type="number" value={shared.max_price} onChange={(e) => set("max_price")(e.target.value)} />
+              </Field>
 
+              <Field label="توضیحات (برای همه اقلام)" className="md:col-span-2">
+                <Textarea
+                  rows={4}
+                  value={shared.description}
+                  onChange={(e) => set("description")(e.target.value)}
+                  placeholder="بسته‌بندی، برند مورد نظر، شرایط پرداخت و هر نکته مهم دیگر"
+                />
+              </Field>
+            </>
+          )}
 
-        <div className="md:col-span-2">
-          <Button type="submit" disabled={mutation.isPending}>
-            {mutation.isPending ? "در حال ثبت…" : "ثبت درخواست"}
-          </Button>
+          <div className="md:col-span-2">
+            <Button type="submit" disabled={mutation.isPending}>
+              {mutation.isPending ? "در حال ثبت…" : items.length > 1 ? `ثبت ${items.length} درخواست خرید` : "ثبت درخواست"}
+            </Button>
+          </div>
         </div>
       </form>
     </PanelShell>
+  );
+}
+
+function ItemRowFields({
+  item,
+  index,
+  canRemove,
+  onChange,
+  onRemove,
+}: {
+  item: ItemRow;
+  index: number;
+  canRemove: boolean;
+  onChange: (patch: Partial<ItemRow>) => void;
+  onRemove: () => void;
+}) {
+  const { data: categories = [] } = useQuery({
+    queryKey: ["categories-flat"],
+    queryFn: async () => {
+      const { data } = await supabase.from("categories").select("id, name").order("sort_order");
+      return data ?? [];
+    },
+  });
+
+  const referenceQuery = item.product_name.trim();
+  const { data: siteReference } = useQuery({
+    queryKey: ["own-site-reference-price", referenceQuery],
+    enabled: referenceQuery.length >= 3,
+    queryFn: async () => {
+      const variants = getSearchVariants(referenceQuery);
+      if (variants.length === 0) return null;
+      const orClauses = variants.flatMap((term) => [`name.ilike.%${term}%`, `brand.ilike.%${term}%`]);
+      const { data } = await supabase
+        .from("products")
+        .select("base_price, unit, suppliers(company_name)")
+        .eq("status", "active")
+        .or(orClauses.join(","))
+        .order("base_price", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      return data;
+    },
+  });
+
+  return (
+    <div className="rounded-2xl border border-border bg-card p-4">
+      <div className="mb-3 flex items-center justify-between">
+        <span className="text-xs font-medium text-muted-foreground">قلم {index + 1}</span>
+        {canRemove && (
+          <Button type="button" variant="ghost" size="icon" onClick={onRemove}>
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+      <div className="grid gap-3 sm:grid-cols-4">
+        <div className="sm:col-span-2">
+          <Label className="mb-2 block text-xs">نام کالا</Label>
+          <Input
+            value={item.product_name}
+            onChange={(e) => onChange({ product_name: e.target.value })}
+            placeholder="مثلاً کوکاکولا قوطی ۳۳۰ میلی‌لیتر"
+          />
+          {siteReference && (
+            <p className="mt-1 text-xs text-muted-foreground">
+              قیمت مرجع در عمده‌یار: {toman(siteReference.base_price)} / {siteReference.unit}
+              {siteReference.suppliers?.company_name ? ` (${siteReference.suppliers.company_name})` : ""}
+            </p>
+          )}
+        </div>
+        <div>
+          <Label className="mb-2 block text-xs">مقدار</Label>
+          <Input type="number" value={item.quantity} onChange={(e) => onChange({ quantity: e.target.value })} placeholder="۳۰" />
+        </div>
+        <div>
+          <Label className="mb-2 block text-xs">واحد</Label>
+          <Select value={item.unit} onValueChange={(v) => onChange({ unit: v })}>
+            <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {UNITS.map((u) => (
+                <SelectItem key={u.value} value={u.value}>{u.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="sm:col-span-4">
+          <Label className="mb-2 block text-xs">دسته‌بندی (اختیاری)</Label>
+          <Select value={item.category_id} onValueChange={(v) => onChange({ category_id: v })}>
+            <SelectTrigger className="w-full"><SelectValue placeholder="انتخاب کنید" /></SelectTrigger>
+            <SelectContent>
+              {categories.map((c) => (
+                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    </div>
   );
 }
 
