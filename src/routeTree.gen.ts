@@ -30,6 +30,7 @@ import { Route as SuppliersIdRouteImport } from './routes/suppliers.$id'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated/admin.products'
 import { Route as AuthenticatedAdminPromotionsRouteImport } from './routes/_authenticated/admin.promotions'
+import { Route as AuthenticatedAdminReferencePricesRouteImport } from './routes/_authenticated/admin.reference-prices'
 import { Route as AuthenticatedAdminRequestsRouteImport } from './routes/_authenticated/admin.requests'
 import { Route as AuthenticatedAdminSuppliersRouteImport } from './routes/_authenticated/admin.suppliers'
 import { Route as AuthenticatedBuyerDashboardRouteImport } from './routes/_authenticated/buyer.dashboard'
@@ -155,6 +156,12 @@ const AuthenticatedAdminPromotionsRoute =
     path: '/admin/promotions',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminReferencePricesRoute =
+  AuthenticatedAdminReferencePricesRouteImport.update({
+    id: '/admin/reference-prices',
+    path: '/admin/reference-prices',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminRequestsRoute =
   AuthenticatedAdminRequestsRouteImport.update({
     id: '/admin/requests',
@@ -272,6 +279,7 @@ export interface FileRoutesByFullPath {
   '/suppliers/': typeof SuppliersIndexRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/admin/promotions': typeof AuthenticatedAdminPromotionsRoute
+  '/admin/reference-prices': typeof AuthenticatedAdminReferencePricesRoute
   '/admin/requests': typeof AuthenticatedAdminRequestsRoute
   '/admin/suppliers': typeof AuthenticatedAdminSuppliersRoute
   '/buyer/dashboard': typeof AuthenticatedBuyerDashboardRoute
@@ -310,6 +318,7 @@ export interface FileRoutesByTo {
   '/suppliers': typeof SuppliersIndexRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/admin/promotions': typeof AuthenticatedAdminPromotionsRoute
+  '/admin/reference-prices': typeof AuthenticatedAdminReferencePricesRoute
   '/admin/requests': typeof AuthenticatedAdminRequestsRoute
   '/admin/suppliers': typeof AuthenticatedAdminSuppliersRoute
   '/buyer/dashboard': typeof AuthenticatedBuyerDashboardRoute
@@ -350,6 +359,7 @@ export interface FileRoutesById {
   '/suppliers/': typeof SuppliersIndexRoute
   '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRoute
   '/_authenticated/admin/promotions': typeof AuthenticatedAdminPromotionsRoute
+  '/_authenticated/admin/reference-prices': typeof AuthenticatedAdminReferencePricesRoute
   '/_authenticated/admin/requests': typeof AuthenticatedAdminRequestsRoute
   '/_authenticated/admin/suppliers': typeof AuthenticatedAdminSuppliersRoute
   '/_authenticated/buyer/dashboard': typeof AuthenticatedBuyerDashboardRoute
@@ -390,6 +400,7 @@ export interface FileRouteTypes {
     | '/suppliers/'
     | '/admin/products'
     | '/admin/promotions'
+    | '/admin/reference-prices'
     | '/admin/requests'
     | '/admin/suppliers'
     | '/buyer/dashboard'
@@ -428,6 +439,7 @@ export interface FileRouteTypes {
     | '/suppliers'
     | '/admin/products'
     | '/admin/promotions'
+    | '/admin/reference-prices'
     | '/admin/requests'
     | '/admin/suppliers'
     | '/buyer/dashboard'
@@ -467,6 +479,7 @@ export interface FileRouteTypes {
     | '/suppliers/'
     | '/_authenticated/admin/products'
     | '/_authenticated/admin/promotions'
+    | '/_authenticated/admin/reference-prices'
     | '/_authenticated/admin/requests'
     | '/_authenticated/admin/suppliers'
     | '/_authenticated/buyer/dashboard'
@@ -653,6 +666,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminPromotionsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/reference-prices': {
+      id: '/_authenticated/admin/reference-prices'
+      path: '/admin/reference-prices'
+      fullPath: '/admin/reference-prices'
+      preLoaderRoute: typeof AuthenticatedAdminReferencePricesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/requests': {
       id: '/_authenticated/admin/requests'
       path: '/admin/requests'
@@ -774,6 +794,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedAdminProductsRoute: typeof AuthenticatedAdminProductsRoute
   AuthenticatedAdminPromotionsRoute: typeof AuthenticatedAdminPromotionsRoute
+  AuthenticatedAdminReferencePricesRoute: typeof AuthenticatedAdminReferencePricesRoute
   AuthenticatedAdminRequestsRoute: typeof AuthenticatedAdminRequestsRoute
   AuthenticatedAdminSuppliersRoute: typeof AuthenticatedAdminSuppliersRoute
   AuthenticatedBuyerDashboardRoute: typeof AuthenticatedBuyerDashboardRoute
@@ -799,6 +820,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedAdminProductsRoute: AuthenticatedAdminProductsRoute,
   AuthenticatedAdminPromotionsRoute: AuthenticatedAdminPromotionsRoute,
+  AuthenticatedAdminReferencePricesRoute:
+    AuthenticatedAdminReferencePricesRoute,
   AuthenticatedAdminRequestsRoute: AuthenticatedAdminRequestsRoute,
   AuthenticatedAdminSuppliersRoute: AuthenticatedAdminSuppliersRoute,
   AuthenticatedBuyerDashboardRoute: AuthenticatedBuyerDashboardRoute,
