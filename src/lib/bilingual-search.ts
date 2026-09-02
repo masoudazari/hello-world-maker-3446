@@ -77,7 +77,7 @@ export function getSearchVariants(query: string): string[] {
   for (const word of words) {
     const groupId = ALIAS_LOOKUP.get(word);
     if (groupId !== undefined) {
-      BRAND_ALIASES[groupId].forEach((term) => variants.add(term));
+      (BRAND_ALIASES[groupId] ?? []).forEach((term) => variants.add(term));
     }
   }
   return Array.from(variants);

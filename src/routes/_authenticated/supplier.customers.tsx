@@ -37,7 +37,14 @@ type OrderRow = {
   status: string;
 };
 
-function matchesFilter(row: OrderRow, q: string) {
+type FilterableRow = {
+  buyer_name_snapshot?: string | null;
+  buyer_phone_snapshot?: string | null;
+  product_name_snapshot?: string | null;
+  invoice_number?: number | null;
+};
+
+function matchesFilter(row: FilterableRow, q: string) {
   if (!q.trim()) return true;
   const needle = q.trim().toLowerCase();
   return (
@@ -108,7 +115,11 @@ function SupplierCustomers() {
       }
     }
     return Array.from(map.values())
-      .filter((c) => (query.trim() ? matchesFilter({ ...c, buyer_name_snapshot: c.name, buyer_phone_snapshot: c.phone, product_name_snapshot: "", invoice_number: 0 } as OrderRow, query) : true))
+      .filter((c) =>
+        query.trim()
+          ? matchesFilter({ buyer_name_snapshot: c.name, buyer_phone_snapshot: c.phone, product_name_snapshot: "", invoice_number: 0 }, query)
+          : true,
+      )
       .sort((a, b) => b.total - a.total);
   }, [orders, query]);
 

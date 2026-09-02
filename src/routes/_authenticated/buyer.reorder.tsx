@@ -74,8 +74,8 @@ function BuyerReorder() {
     () =>
       patterns.map((p) => ({
         key: `usual:${p.product_name}`,
-        productName: p.product_name,
-        unit: p.unit,
+        productName: p.product_name ?? "",
+        unit: p.unit ?? "عدد",
         quantity: Number(p.typical_quantity),
         meta: p.avg_interval_days
           ? `معمولاً هر ${faNumber(p.avg_interval_days)} روز · ${faNumber(p.order_count)} سفارش قبلی`
