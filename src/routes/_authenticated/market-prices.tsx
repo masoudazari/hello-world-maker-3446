@@ -119,9 +119,9 @@ function MarketPrices() {
             </a>
           </Button>
           <Button variant="outline" size="sm" asChild>
-            <a href="https://snapp.ir/shop/" target="_blank" rel="noopener noreferrer">
+            <a href="https://grocery.snapp.ir/" target="_blank" rel="noopener noreferrer">
               <ExternalLink className="ml-2 h-3.5 w-3.5" />
-              باز کردن اسنپ (جستجوی دستی)
+              باز کردن اسنپ‌مارکت (نیاز به انتخاب موقعیت)
             </a>
           </Button>
           <Select value={divarCity} onValueChange={setDivarCity}>
