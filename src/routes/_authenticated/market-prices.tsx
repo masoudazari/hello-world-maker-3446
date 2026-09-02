@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { ExternalLink, Search } from "lucide-react";
 import { PanelShell } from "@/components/layout/PanelShell";
 import { EmptyState } from "@/components/common/EmptyState";
@@ -8,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { getSearchVariants } from "@/lib/bilingual-search";
 
@@ -52,9 +55,33 @@ type MarketRow = {
 function MarketPrices() {
   const { data: account } = useAccount();
   const role = account?.role ?? "buyer";
+  const queryClient = useQueryClient();
   const [query, setQuery] = useState("");
   const [searchKey, setSearchKey] = useState<string | null>(null);
   const [divarCity, setDivarCity] = useState("tehran");
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportForm, setReportForm] = useState({ price: "", seller_name: "", product_url: "" });
+
+  const reportPrice = useMutation({
+    mutationFn: async () => {
+      if (!query.trim()) throw new Error("ابتدا نام کالا را در بالا جستجو کنید.");
+      if (!reportForm.price || Number(reportForm.price) <= 0) throw new Error("قیمت نامعتبر است.");
+      const { error } = await supabase.rpc("report_market_price", {
+        _product_name: query.trim(),
+        _price: Number(reportForm.price),
+        _seller_name: reportForm.seller_name || null,
+        _product_url: reportForm.product_url || null,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("قیمت شما ثبت شد و به دیگران کمک می‌کند.");
+      setReportOpen(false);
+      setReportForm({ price: "", seller_name: "", product_url: "" });
+      void queryClient.invalidateQueries({ queryKey: ["market-prices", searchKey] });
+    },
+    onError: (err: Error) => toast.error(err.message || "ثبت قیمت ناموفق بود."),
+  });
 
   const collect = useMutation({
     mutationFn: async (q: string) => {
@@ -234,29 +261,83 @@ function MarketPrices() {
           ) : siteProducts.length === 0 ? (
             <EmptyState title="محصول مشابهی در فهرست عمده‌یار پیدا نشد" />
           ) : (
-            <div className="grid gap-3">
-              {siteProducts.map((p) => (
-                <div key={p.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4">
-                  <div>
-                    <p className="font-medium">
-                      {p.name} {p.brand && <span className="text-muted-foreground">({p.brand})</span>}
-                    </p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {p.suppliers?.company_name ?? "فروشنده"} · {p.city}
+            <>
+              {siteProducts.length > 1 && (
+                <p className="mb-3 text-xs text-muted-foreground">
+                  از بین {siteProducts.length} فروشنده · کمترین: {toman(Math.min(...siteProducts.map((p) => p.base_price)))} ·
+                  میانگین:{" "}
+                  {toman(Math.round(siteProducts.reduce((s, p) => s + p.base_price, 0) / siteProducts.length))} · بیشترین:{" "}
+                  {toman(Math.max(...siteProducts.map((p) => p.base_price)))}
+                </p>
+              )}
+              <div className="grid gap-3">
+                {siteProducts.map((p) => (
+                  <div key={p.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4">
+                    <div>
+                      <p className="font-medium">
+                        {p.name} {p.brand && <span className="text-muted-foreground">({p.brand})</span>}
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {p.suppliers?.company_name ?? "فروشنده"} · {p.city}
+                      </p>
+                    </div>
+                    <p className="text-lg font-bold text-primary">
+                      {toman(p.base_price)} <span className="text-xs font-normal text-muted-foreground">/ {p.unit}</span>
                     </p>
                   </div>
-                  <p className="text-lg font-bold text-primary">
-                    {toman(p.base_price)} <span className="text-xs font-normal text-muted-foreground">/ {p.unit}</span>
-                  </p>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
       )}
 
       <div className="mt-6">
-        <h2 className="mb-3 text-sm font-bold">منابع بیرونی</h2>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-sm font-bold">قیمت‌های ثبت‌شده (منابع دیگر و کاربران)</h2>
+          <Dialog open={reportOpen} onOpenChange={setReportOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm" disabled={!query.trim()}>
+                قیمتی که دیدید را ثبت کنید
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-sm">
+              <DialogHeader>
+                <DialogTitle>ثبت قیمت مشاهده‌شده برای «{query.trim()}»</DialogTitle>
+              </DialogHeader>
+              <div className="grid gap-3">
+                <div>
+                  <Label className="mb-2 block text-xs">قیمت (تومان)</Label>
+                  <Input
+                    type="number"
+                    value={reportForm.price}
+                    onChange={(e) => setReportForm({ ...reportForm, price: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label className="mb-2 block text-xs">فروشنده/سایت (اختیاری)</Label>
+                  <Input
+                    value={reportForm.seller_name}
+                    onChange={(e) => setReportForm({ ...reportForm, seller_name: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label className="mb-2 block text-xs">لینک (اختیاری)</Label>
+                  <Input
+                    dir="ltr"
+                    value={reportForm.product_url}
+                    onChange={(e) => setReportForm({ ...reportForm, product_url: e.target.value })}
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button onClick={() => reportPrice.mutate()} disabled={reportPrice.isPending}>
+                  {reportPrice.isPending ? "در حال ثبت…" : "ثبت قیمت"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
         {isLoading ? (
           <p className="text-sm text-muted-foreground">در حال بارگذاری…</p>
         ) : !searchKey ? (
