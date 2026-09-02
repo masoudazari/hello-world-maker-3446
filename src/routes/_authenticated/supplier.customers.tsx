@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import * as XLSX from "xlsx";
+import { toast } from "sonner";
 import { PanelShell } from "@/components/layout/PanelShell";
 import { EmptyState } from "@/components/common/EmptyState";
 import { Input } from "@/components/ui/input";
@@ -36,6 +37,25 @@ type OrderRow = {
   buyer_phone_snapshot: string | null;
   status: string;
 };
+
+function downloadWorkbook(workbook: XLSX.WorkBook, filename: string) {
+  // XLSX.writeFile's built-in save mechanism can silently fail inside
+  // sandboxed preview iframes (e.g. Lovable's own preview), because it
+  // relies on an <a> element that isn't guaranteed to trigger a real
+  // download unless it's actually attached to the document. Building
+  // the Blob + object URL + DOM-attached anchor manually is the more
+  // broadly compatible pattern.
+  const wbout = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+  const blob = new Blob([wbout], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
 
 function matchesFilter(row: OrderRow, q: string) {
   if (!q.trim()) return true;
@@ -113,38 +133,58 @@ function SupplierCustomers() {
   }, [orders, query]);
 
   function exportInvoicesToExcel(rows: OrderRow[], filename: string) {
-    const sheetData = rows.map((r) => ({
-      "شماره فاکتور": r.invoice_number,
-      تاریخ: faDate(r.created_at),
-      مشتری: r.buyer_name_snapshot ?? "",
-      "تلفن مشتری": r.buyer_phone_snapshot ?? "",
-      محصول: r.product_name_snapshot ?? "",
-      تعداد: r.quantity,
-      واحد: r.unit_snapshot ?? "",
-      "قیمت واحد": r.unit_price_snapshot,
-      تخفیف: r.discount_amount,
-      "مبلغ نهایی": r.total_amount,
-      وضعیت: r.status,
-    }));
-    const worksheet = XLSX.utils.json_to_sheet(sheetData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "فاکتورها");
-    XLSX.writeFile(workbook, filename);
+    if (rows.length === 0) {
+      toast.error("داده‌ای برای خروجی گرفتن وجود ندارد.");
+      return;
+    }
+    try {
+      const sheetData = rows.map((r) => ({
+        "شماره فاکتور": r.invoice_number,
+        تاریخ: faDate(r.created_at),
+        مشتری: r.buyer_name_snapshot ?? "",
+        "تلفن مشتری": r.buyer_phone_snapshot ?? "",
+        محصول: r.product_name_snapshot ?? "",
+        تعداد: r.quantity,
+        واحد: r.unit_snapshot ?? "",
+        "قیمت واحد": r.unit_price_snapshot,
+        تخفیف: r.discount_amount,
+        "مبلغ نهایی": r.total_amount,
+        وضعیت: r.status,
+      }));
+      const worksheet = XLSX.utils.json_to_sheet(sheetData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "فاکتورها");
+      downloadWorkbook(workbook, filename);
+      toast.success("فایل اکسل آماده شد.");
+    } catch (err) {
+      console.error(err);
+      toast.error("ساخت فایل اکسل ناموفق بود.");
+    }
   }
 
   function exportCustomerSummaryToExcel() {
-    const sheetData = customers.map((c) => ({
-      نام: c.name,
-      تلفن: c.phone,
-      "تعداد سفارش": c.orders,
-      "مجموع خرید": c.total,
-      "اولین خرید": faDate(c.first),
-      "آخرین خرید": faDate(c.last),
-    }));
-    const worksheet = XLSX.utils.json_to_sheet(sheetData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "خلاصه مشتریان");
-    XLSX.writeFile(workbook, "خلاصه-مشتریان.xlsx");
+    if (customers.length === 0) {
+      toast.error("داده‌ای برای خروجی گرفتن وجود ندارد.");
+      return;
+    }
+    try {
+      const sheetData = customers.map((c) => ({
+        نام: c.name,
+        تلفن: c.phone,
+        "تعداد سفارش": c.orders,
+        "مجموع خرید": c.total,
+        "اولین خرید": faDate(c.first),
+        "آخرین خرید": faDate(c.last),
+      }));
+      const worksheet = XLSX.utils.json_to_sheet(sheetData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "خلاصه مشتریان");
+      downloadWorkbook(workbook, "خلاصه-مشتریان.xlsx");
+      toast.success("فایل اکسل آماده شد.");
+    } catch (err) {
+      console.error(err);
+      toast.error("ساخت فایل اکسل ناموفق بود.");
+    }
   }
 
   const selectedCustomerName = selectedCustomer

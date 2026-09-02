@@ -78,7 +78,6 @@ function SupplierProducts() {
                 <th className="p-3 font-medium">نام کالا</th>
                 <th className="p-3 font-medium">قیمت پایه</th>
                 <th className="p-3 font-medium">حداقل سفارش</th>
-                <th className="p-3 font-medium">موجودی</th>
                 <th className="p-3 font-medium">شهر</th>
                 <th className="p-3 font-medium">وضعیت</th>
                 <th className="p-3 font-medium">وضعیت بازار</th>
@@ -92,7 +91,6 @@ function SupplierProducts() {
                   <td className="p-3 font-medium">{p.name}</td>
                   <td className="p-3">{toman(p.base_price)}</td>
                   <td className="p-3">{faNumber(p.minimum_order)} {p.unit}</td>
-                  <td className="p-3">{faNumber(p.stock)}</td>
                   <td className="p-3">{p.city}</td>
                   <td className="p-3"><StatusBadge kind="product" value={p.status} /></td>
                   <td className="p-3 text-xs">
@@ -138,7 +136,6 @@ function ProductDialog({ supplierId }: { supplierId: string }) {
     brand: "",
     unit: "عدد",
     minimum_order: "1",
-    stock: "0",
     city: "تهران",
     base_price: "",
     description: "",
@@ -164,7 +161,7 @@ function ProductDialog({ supplierId }: { supplierId: string }) {
         brand: form.brand || null,
         unit: form.unit,
         minimum_order: Number(form.minimum_order) || 1,
-        stock: Number(form.stock) || 0,
+        stock: 0,
         city: form.city,
         base_price: Number(form.base_price) || 0,
         description: form.description || null,
@@ -174,7 +171,7 @@ function ProductDialog({ supplierId }: { supplierId: string }) {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("محصول ثبت شد و در انتظار تأیید است.");
+      toast.success("محصول ثبت و بلافاصله در فهرست عمومی قرار گرفت.");
       setOpen(false);
       void queryClient.invalidateQueries({ queryKey: ["supplier-products"] });
     },
@@ -228,10 +225,6 @@ function ProductDialog({ supplierId }: { supplierId: string }) {
           <div>
             <Label className="mb-2 block text-xs">حداقل سفارش</Label>
             <Input type="number" value={form.minimum_order} onChange={(e) => setForm({ ...form, minimum_order: e.target.value })} />
-          </div>
-          <div>
-            <Label className="mb-2 block text-xs">موجودی</Label>
-            <Input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} />
           </div>
           <div>
             <Label className="mb-2 block text-xs">شهر</Label>
