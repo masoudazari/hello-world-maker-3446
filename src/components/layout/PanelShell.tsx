@@ -51,6 +51,7 @@ const NAV: Record<AppRole, NavItem[]> = {
     { to: "/admin/products", label: "محصولات", icon: Boxes },
     { to: "/admin/requests", label: "درخواست‌ها", icon: Users },
     { to: "/admin/promotions", label: "پیشنهادهای تبلیغاتی", icon: Sparkles },
+    { to: "/admin/reference-prices", label: "قیمت‌های مرجع", icon: TrendingUp },
   ],
 };
 

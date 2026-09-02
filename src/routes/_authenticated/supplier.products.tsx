@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useAccount } from "@/lib/auth";
+import { getSearchVariants } from "@/lib/bilingual-search";
 import { CITIES, UNITS } from "@/lib/constants";
 import { faNumber, slugify, toman } from "@/lib/format";
 
@@ -185,6 +186,24 @@ function ProductDialog({ supplierId }: { supplierId: string }) {
     },
   });
 
+  const referenceQuery = `${form.name} ${form.brand}`.trim();
+  const { data: suggestedPrice } = useQuery({
+    queryKey: ["reference-price-suggestion", referenceQuery],
+    enabled: referenceQuery.length >= 3,
+    queryFn: async () => {
+      const variants = getSearchVariants(referenceQuery);
+      if (variants.length === 0) return null;
+      const orClauses = variants.flatMap((term) => [`product_name.ilike.%${term}%`, `brand.ilike.%${term}%`]);
+      const { data } = await supabase
+        .from("reference_prices")
+        .select("id, product_name, brand, approx_price, unit")
+        .or(orClauses.join(","))
+        .limit(1)
+        .maybeSingle();
+      return data;
+    },
+  });
+
   const mutation = useMutation({
     mutationFn: async () => {
       if (!form.name.trim()) throw new Error("نام کالا الزامی است.");
@@ -245,6 +264,15 @@ function ProductDialog({ supplierId }: { supplierId: string }) {
           <div>
             <Label className="mb-2 block text-xs">قیمت پایه (تومان)</Label>
             <Input type="number" value={form.base_price} onChange={(e) => setForm({ ...form, base_price: e.target.value })} />
+            {suggestedPrice && (
+              <button
+                type="button"
+                onClick={() => setForm((f) => ({ ...f, base_price: String(suggestedPrice.approx_price) }))}
+                className="mt-1.5 block text-xs text-primary underline underline-offset-2"
+              >
+                قیمت مرجع تقریبی: {toman(suggestedPrice.approx_price)} / {suggestedPrice.unit} (برای استفاده کلیک کنید)
+              </button>
+            )}
           </div>
           <div>
             <Label className="mb-2 block text-xs">واحد</Label>

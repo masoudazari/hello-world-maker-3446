@@ -104,6 +104,22 @@ function MarketPrices() {
     },
   });
 
+  const { data: referencePrices = [] } = useQuery({
+    queryKey: ["reference-prices", searchKey],
+    enabled: Boolean(searchKey),
+    queryFn: async () => {
+      const variants = getSearchVariants(searchKey!);
+      const orClauses = variants.flatMap((term) => [`product_name.ilike.%${term}%`, `brand.ilike.%${term}%`]);
+      const { data, error } = await supabase
+        .from("reference_prices")
+        .select("id, product_name, brand, unit, approx_price, price_range_min, price_range_max, note, updated_at")
+        .or(orClauses.join(","))
+        .limit(10);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
   return (
     <PanelShell role={role} title="مقایسه قیمت بازار" subtitle="جستجوی یک محصول و مقایسه قیمت آن در منابع مختلف">
       <div className="flex gap-2">
@@ -178,6 +194,35 @@ function MarketPrices() {
           نتایجی که برچسب <strong>Mock</strong> دارند داده نمایشی‌اند، نه قیمت واقعی بازار. اتصال مستقیم به سایت‌هایی مثل
           ترب امکان‌پذیر نیست (بدون API رسمی)؛ در عوض نتایج بدون این برچسب از Google Custom Search (رسمی) استخراج شده‌اند
           و تخمینی‌اند، نه قیمت تضمینی.
+        </div>
+      )}
+
+      {searchKey && referencePrices.length > 0 && (
+        <div className="mt-6 rounded-2xl border border-primary/30 bg-primary/5 p-4">
+          <h2 className="mb-3 text-sm font-bold">قیمت مرجع تقریبی</h2>
+          <div className="grid gap-3">
+            {referencePrices.map((r) => (
+              <div key={r.id} className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="font-medium">
+                    {r.product_name} {r.brand && <span className="text-muted-foreground">({r.brand})</span>}
+                  </p>
+                  {r.note && <p className="mt-1 text-xs text-muted-foreground">{r.note}</p>}
+                  <p className="mt-1 text-[10px] text-muted-foreground">
+                    آخرین به‌روزرسانی: {faDate(r.updated_at)} · تخمینی، نه قیمت لحظه‌ای بازار
+                  </p>
+                </div>
+                <div className="text-left">
+                  <p className="text-lg font-bold text-primary">{toman(r.approx_price)}</p>
+                  {r.price_range_min && r.price_range_max && (
+                    <p className="text-xs text-muted-foreground">
+                      بازه: {toman(r.price_range_min)} تا {toman(r.price_range_max)}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
