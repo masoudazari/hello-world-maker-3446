@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { getSearchVariants } from "@/lib/bilingual-search";
 
 const DIVAR_CITIES = [
   { slug: "tehran", label: "تهران" },
@@ -61,8 +62,13 @@ function MarketPrices() {
       if (error) throw error;
       return data as { searchKey: string; inserted: number };
     },
-    onSuccess: (data) => setSearchKey(data.searchKey),
   });
+
+  function runSearch(q: string) {
+    if (!q.trim()) return;
+    setSearchKey(q.trim().toLowerCase());
+    collect.mutate(q.trim());
+  }
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["market-prices", searchKey],
@@ -80,6 +86,24 @@ function MarketPrices() {
 
   const hasMockData = rows.some((r) => r.is_mock);
 
+  const { data: siteProducts = [], isLoading: loadingSiteProducts } = useQuery({
+    queryKey: ["market-prices-own-site", searchKey],
+    enabled: Boolean(searchKey),
+    queryFn: async () => {
+      const variants = getSearchVariants(searchKey!);
+      const orClauses = variants.flatMap((term) => [`name.ilike.%${term}%`, `brand.ilike.%${term}%`]);
+      const { data, error } = await supabase
+        .from("products")
+        .select("id, name, brand, unit, base_price, city, suppliers(company_name, rating)")
+        .eq("status", "active")
+        .or(orClauses.join(","))
+        .order("base_price", { ascending: true })
+        .limit(20);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
   return (
     <PanelShell role={role} title="مقایسه قیمت بازار" subtitle="جستجوی یک محصول و مقایسه قیمت آن در منابع مختلف">
       <div className="flex gap-2">
@@ -87,9 +111,9 @@ function MarketPrices() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="مثلاً: قهوه اسپرسو ۱ کیلویی"
-          onKeyDown={(e) => e.key === "Enter" && query.trim() && collect.mutate(query.trim())}
+          onKeyDown={(e) => e.key === "Enter" && runSearch(query)}
         />
-        <Button onClick={() => query.trim() && collect.mutate(query.trim())} disabled={collect.isPending}>
+        <Button onClick={() => runSearch(query)} disabled={collect.isPending}>
           <Search className="ml-2 h-4 w-4" />
           {collect.isPending ? "در حال جستجو…" : "جستجو"}
         </Button>
@@ -157,7 +181,37 @@ function MarketPrices() {
         </div>
       )}
 
+      {searchKey && (
+        <div className="mt-6">
+          <h2 className="mb-3 text-sm font-bold">قیمت در عمده‌یار</h2>
+          {loadingSiteProducts ? (
+            <p className="text-sm text-muted-foreground">در حال جستجو…</p>
+          ) : siteProducts.length === 0 ? (
+            <EmptyState title="محصول مشابهی در فهرست عمده‌یار پیدا نشد" />
+          ) : (
+            <div className="grid gap-3">
+              {siteProducts.map((p) => (
+                <div key={p.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4">
+                  <div>
+                    <p className="font-medium">
+                      {p.name} {p.brand && <span className="text-muted-foreground">({p.brand})</span>}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {p.suppliers?.company_name ?? "فروشنده"} · {p.city}
+                    </p>
+                  </div>
+                  <p className="text-lg font-bold text-primary">
+                    {toman(p.base_price)} <span className="text-xs font-normal text-muted-foreground">/ {p.unit}</span>
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="mt-6">
+        <h2 className="mb-3 text-sm font-bold">منابع بیرونی</h2>
         {isLoading ? (
           <p className="text-sm text-muted-foreground">در حال بارگذاری…</p>
         ) : !searchKey ? (

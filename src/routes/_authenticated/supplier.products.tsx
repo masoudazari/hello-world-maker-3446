@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { ImagePlus, Loader2, X } from "lucide-react";
 import { PanelShell } from "@/components/layout/PanelShell";
 import { EmptyState } from "@/components/common/EmptyState";
 import { StatusBadge } from "@/components/common/StatusBadge";
@@ -130,6 +131,8 @@ function SupplierProducts() {
 function ProductDialog({ supplierId }: { supplierId: string }) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
     name: "",
     category_id: "",
@@ -141,6 +144,38 @@ function ProductDialog({ supplierId }: { supplierId: string }) {
     description: "",
     image_url: "",
   });
+
+  async function handleImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("لطفاً یک فایل تصویری انتخاب کنید.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("حجم تصویر نباید بیشتر از ۵ مگابایت باشد.");
+      return;
+    }
+    setUploading(true);
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("ابتدا وارد حساب کاربری شوید.");
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `${user.id}/products/${crypto.randomUUID()}.${ext}`;
+      const { error: uploadError } = await supabase.storage.from("uploads").upload(path, file, { upsert: true });
+      if (uploadError) throw uploadError;
+      const { data: publicUrl } = supabase.storage.from("uploads").getPublicUrl(path);
+      setForm((f) => ({ ...f, image_url: publicUrl.publicUrl }));
+      toast.success("تصویر آپلود شد.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "آپلود تصویر ناموفق بود.");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
 
   const { data: categories = [] } = useQuery({
     queryKey: ["categories-flat"],
@@ -238,8 +273,42 @@ function ProductDialog({ supplierId }: { supplierId: string }) {
             </Select>
           </div>
           <div>
-            <Label className="mb-2 block text-xs">آدرس تصویر</Label>
-            <Input value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="https://" dir="ltr" />
+            <Label className="mb-2 block text-xs">تصویر محصول</Label>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleImageSelect}
+            />
+            {form.image_url ? (
+              <div className="flex items-center gap-3">
+                <img src={form.image_url} alt="پیش‌نمایش" className="h-16 w-16 rounded-lg object-cover" />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setForm((f) => ({ ...f, image_url: "" }))}
+                >
+                  <X className="ml-1 h-3.5 w-3.5" /> حذف
+                </Button>
+              </div>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={uploading}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {uploading ? (
+                  <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <ImagePlus className="ml-2 h-4 w-4" />
+                )}
+                {uploading ? "در حال آپلود…" : "انتخاب عکس از گوشی"}
+              </Button>
+            )}
           </div>
           <div className="sm:col-span-2">
             <Label className="mb-2 block text-xs">توضیحات</Label>
