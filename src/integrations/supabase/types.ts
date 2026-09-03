@@ -258,6 +258,9 @@ export type Database = {
           id: string
           invoice_number: number
           offer_id: string | null
+          payment_surcharge_amount: number
+          payment_surcharge_percent: number
+          payment_term_code: string | null
           product_name_snapshot: string | null
           quantity: number
           request_id: string | null
@@ -276,6 +279,9 @@ export type Database = {
           id?: string
           invoice_number?: number
           offer_id?: string | null
+          payment_surcharge_amount?: number
+          payment_surcharge_percent?: number
+          payment_term_code?: string | null
           product_name_snapshot?: string | null
           quantity?: number
           request_id?: string | null
@@ -294,6 +300,9 @@ export type Database = {
           id?: string
           invoice_number?: number
           offer_id?: string | null
+          payment_surcharge_amount?: number
+          payment_surcharge_percent?: number
+          payment_term_code?: string | null
           product_name_snapshot?: string | null
           quantity?: number
           request_id?: string | null
@@ -389,6 +398,45 @@ export type Database = {
           },
           {
             foreignKeyName: "product_images_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_payment_terms: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string
+          surcharge_percent: number
+          term_code: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id: string
+          surcharge_percent?: number
+          term_code: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string
+          surcharge_percent?: number
+          term_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_payment_terms_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "product_market_stats"
+            referencedColumns: ["product_id"]
+          },
+          {
+            foreignKeyName: "product_payment_terms_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
@@ -1106,6 +1154,8 @@ export type Database = {
           id: string
           is_demo: boolean
           min_supply_quantity: number | null
+          payment_surcharge_percent: number
+          payment_term_code: string | null
           payment_terms: string | null
           preparation_time: string | null
           request_id: string
@@ -1123,6 +1173,8 @@ export type Database = {
           id?: string
           is_demo?: boolean
           min_supply_quantity?: number | null
+          payment_surcharge_percent?: number
+          payment_term_code?: string | null
           payment_terms?: string | null
           preparation_time?: string | null
           request_id: string
@@ -1140,6 +1192,8 @@ export type Database = {
           id?: string
           is_demo?: boolean
           min_supply_quantity?: number | null
+          payment_surcharge_percent?: number
+          payment_term_code?: string | null
           payment_terms?: string | null
           preparation_time?: string | null
           request_id?: string
