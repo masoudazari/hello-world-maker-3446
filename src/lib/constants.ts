@@ -108,6 +108,34 @@ export const PAYMENT_TERMS: Option[] = [
   { value: "توافقی", label: "توافقی" },
 ];
 
+/**
+ * Structured payment terms. Unlike the free-text list above these are
+ * comparable and filterable, and each one carries a supplier-defined
+ * surcharge percentage (deferred payment costs the supplier money).
+ */
+export type PaymentTermOption = Option & { defaultSurcharge: number };
+
+export const PAYMENT_TERM_OPTIONS: PaymentTermOption[] = [
+  { value: "cash", label: "نقدی", defaultSurcharge: 0 },
+  { value: "prepay_50", label: "۵۰٪ پیش‌پرداخت", defaultSurcharge: 0 },
+  { value: "net_7", label: "۷ روزه", defaultSurcharge: 2 },
+  { value: "net_30", label: "۳۰ روزه", defaultSurcharge: 10 },
+  { value: "net_60", label: "۶۰ روزه", defaultSurcharge: 18 },
+  { value: "check_1m", label: "چک ۱ ماهه", defaultSurcharge: 8 },
+  { value: "check_3m", label: "چک ۳ ماهه", defaultSurcharge: 20 },
+];
+
+export function paymentTermLabel(code: string | null | undefined): string {
+  if (!code) return "—";
+  return PAYMENT_TERM_OPTIONS.find((o) => o.value === code)?.label ?? code;
+}
+
+/** Total price including the payment-term surcharge, rounded to Toman. */
+export function withSurcharge(base: number, surchargePercent: number | null | undefined): number {
+  const percent = Number(surchargePercent) || 0;
+  return Math.round(base * (1 + percent / 100));
+}
+
 export function labelOf(options: Option[], value: string | null | undefined): string {
   if (!value) return "—";
   return options.find((o) => o.value === value)?.label ?? value;

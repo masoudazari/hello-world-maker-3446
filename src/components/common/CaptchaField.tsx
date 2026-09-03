@@ -42,7 +42,7 @@ export function CaptchaField({
       <Label className="mb-2 block text-xs">تأیید انسان بودن</Label>
       <div className="flex items-center gap-2">
         <span className="rounded-xl border border-border bg-secondary px-3 py-2 text-sm font-bold tabular-nums">
-          {question ? `${fa(question.replace(/\d+/g, (d) => fa(d)))} = ؟` : "…"}
+          {question ? `${fa(question)} = ؟` : "…"}
         </span>
         <Input
           className="max-w-24"
