@@ -74,6 +74,7 @@ export function PanelShell({
 }) {
   const { data: account } = useAccount();
   const signOut = useSignOut();
+  const { unreadCount, muted, setMuted } = useLiveNotifications(account?.userId);
 
   return (
     <div className="min-h-screen bg-secondary/20">
@@ -83,9 +84,18 @@ export function PanelShell({
             <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">ع</span>
             {brand.name}
           </Link>
-          <p className="px-2 pb-3 text-xs text-muted-foreground">
-            {account?.profile?.full_name || "کاربر"}
-          </p>
+          <div className="flex items-center justify-between px-2 pb-3">
+            <p className="text-xs text-muted-foreground">{account?.profile?.full_name || "کاربر"}</p>
+            <button
+              type="button"
+              onClick={() => setMuted(!muted)}
+              title={muted ? "روشن کردن صدای اعلان" : "بی‌صدا کردن اعلان"}
+              aria-label={muted ? "روشن کردن صدای اعلان" : "بی‌صدا کردن اعلان"}
+              className="text-muted-foreground transition hover:text-foreground"
+            >
+              {muted ? <BellOff className="size-4" /> : <BellIcon className="size-4" />}
+            </button>
+          </div>
           <nav className="flex flex-col gap-1">
             {NAV[role].map((item) => (
               <Link
@@ -97,6 +107,11 @@ export function PanelShell({
               >
                 <item.icon className="size-4" />
                 {item.label}
+                {item.to === "/notifications" && unreadCount > 0 && (
+                  <span className="ms-auto rounded-full bg-primary px-2 py-0.5 text-[11px] font-bold text-primary-foreground">
+                    {fa(unreadCount)}
+                  </span>
+                )}
               </Link>
             ))}
           </nav>
