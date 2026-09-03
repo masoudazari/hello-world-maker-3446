@@ -18,9 +18,12 @@ import {
   Users,
 } from "lucide-react";
 
+import { Bell as BellIcon, BellOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { brand } from "@/config/brand";
 import { useAccount, useSignOut, type AppRole } from "@/lib/auth";
+import { useLiveNotifications } from "@/hooks/use-live-notifications";
+import { fa } from "@/lib/format";
 
 type NavItem = { to: string; label: string; icon: typeof LayoutDashboard };
 
