@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useAccount } from "@/lib/auth";
 import { getSearchVariants } from "@/lib/bilingual-search";
-import { CITIES, UNITS } from "@/lib/constants";
+import { CITIES, PAYMENT_TERM_OPTIONS, UNITS } from "@/lib/constants";
 import { faNumber, slugify, toman } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/supplier/products")({
@@ -146,6 +146,17 @@ function ProductDialog({ supplierId }: { supplierId: string }) {
     image_url: "",
   });
 
+  // Which payment terms this product is offered under, and the surcharge
+  // the supplier wants for each deferred option.
+  const [terms, setTerms] = useState<Record<string, { enabled: boolean; percent: string }>>(() =>
+    Object.fromEntries(
+      PAYMENT_TERM_OPTIONS.map((t) => [
+        t.value,
+        { enabled: t.value === "cash", percent: String(t.defaultSurcharge) },
+      ]),
+    ),
+  );
+
   async function handleImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -238,22 +249,36 @@ function ProductDialog({ supplierId }: { supplierId: string }) {
   const mutation = useMutation({
     mutationFn: async () => {
       if (!form.name.trim()) throw new Error("نام کالا الزامی است.");
-      const { error } = await supabase.from("products").insert({
-        supplier_id: supplierId,
-        category_id: form.category_id || null,
-        name: form.name.trim(),
-        slug: `${slugify(form.name)}-${Math.random().toString(36).slice(2, 7)}`,
-        brand: form.brand || null,
-        unit: form.unit,
-        minimum_order: Number(form.minimum_order) || 1,
-        stock: 0,
-        city: form.city,
-        base_price: Number(form.base_price) || 0,
-        description: form.description || null,
-        image_url: form.image_url || null,
-        status: "active",
-      });
+      const { data: created, error } = await supabase
+        .from("products")
+        .insert({
+          supplier_id: supplierId,
+          category_id: form.category_id || null,
+          name: form.name.trim(),
+          slug: `${slugify(form.name)}-${Math.random().toString(36).slice(2, 7)}`,
+          brand: form.brand || null,
+          unit: form.unit,
+          minimum_order: Number(form.minimum_order) || 1,
+          stock: 0,
+          city: form.city,
+          base_price: Number(form.base_price) || 0,
+          description: form.description || null,
+          image_url: form.image_url || null,
+          status: "active",
+        })
+        .select("id")
+        .single();
       if (error) throw error;
+
+      const termRows = PAYMENT_TERM_OPTIONS.filter((t) => terms[t.value]?.enabled).map((t) => ({
+        product_id: created.id,
+        term_code: t.value,
+        surcharge_percent: Number(terms[t.value]?.percent ?? t.defaultSurcharge) || 0,
+      }));
+      if (termRows.length > 0) {
+        const { error: termError } = await supabase.from("product_payment_terms").insert(termRows);
+        if (termError) throw termError;
+      }
     },
     onSuccess: () => {
       toast.success("محصول ثبت و بلافاصله در فهرست عمومی قرار گرفت.");
@@ -268,7 +293,7 @@ function ProductDialog({ supplierId }: { supplierId: string }) {
       <DialogTrigger asChild>
         <Button>افزودن محصول</Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-h-[85vh] max-w-lg overflow-y-auto">
         <DialogHeader>
           <DialogTitle>افزودن محصول جدید</DialogTitle>
         </DialogHeader>
@@ -373,6 +398,46 @@ function ProductDialog({ supplierId }: { supplierId: string }) {
           <div className="sm:col-span-2">
             <Label className="mb-2 block text-xs">توضیحات</Label>
             <Textarea rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+          </div>
+
+          <div className="sm:col-span-2 rounded-xl border border-border p-3">
+            <Label className="mb-1 block text-xs">شرایط پرداخت و درصد اضافه‌بها</Label>
+            <p className="mb-3 text-[11px] text-muted-foreground">
+              مشخص کنید این کالا با چه شرایط پرداختی عرضه می‌شود و برای پرداخت مدت‌دار چند درصد به قیمت اضافه شود.
+            </p>
+            <div className="grid gap-2">
+              {PAYMENT_TERM_OPTIONS.map((t) => {
+                const row = terms[t.value] ?? { enabled: false, percent: String(t.defaultSurcharge) };
+                return (
+                  <div key={t.value} className="flex items-center justify-between gap-3">
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        className="size-4 accent-current"
+                        checked={row.enabled}
+                        onChange={(e) =>
+                          setTerms((s) => ({ ...s, [t.value]: { ...row, enabled: e.target.checked } }))
+                        }
+                      />
+                      {t.label}
+                    </label>
+                    <div className="flex items-center gap-1">
+                      <Input
+                        type="number"
+                        min={0}
+                        max={100}
+                        step="0.5"
+                        className="h-8 w-20"
+                        disabled={!row.enabled}
+                        value={row.percent}
+                        onChange={(e) => setTerms((s) => ({ ...s, [t.value]: { ...row, percent: e.target.value } }))}
+                      />
+                      <span className="text-xs text-muted-foreground">٪</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
         <DialogFooter>

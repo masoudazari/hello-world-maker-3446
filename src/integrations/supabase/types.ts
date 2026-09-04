@@ -841,6 +841,7 @@ export type Database = {
       }
       purchase_requests: {
         Row: {
+          batch_id: string | null
           buyer_id: string | null
           category_id: string | null
           created_at: string
@@ -863,6 +864,7 @@ export type Database = {
           unit: string
         }
         Insert: {
+          batch_id?: string | null
           buyer_id?: string | null
           category_id?: string | null
           created_at?: string
@@ -885,6 +887,7 @@ export type Database = {
           unit?: string
         }
         Update: {
+          batch_id?: string | null
           buyer_id?: string | null
           category_id?: string | null
           created_at?: string
@@ -929,6 +932,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      reference_prices: {
+        Row: {
+          approx_price: number
+          brand: string | null
+          created_at: string
+          id: string
+          note: string | null
+          price_range_max: number | null
+          price_range_min: number | null
+          product_name: string
+          unit: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          approx_price: number
+          brand?: string | null
+          created_at?: string
+          id?: string
+          note?: string | null
+          price_range_max?: number | null
+          price_range_min?: number | null
+          product_name: string
+          unit?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          approx_price?: number
+          brand?: string | null
+          created_at?: string
+          id?: string
+          note?: string | null
+          price_range_max?: number | null
+          price_range_min?: number | null
+          product_name?: string
+          unit?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
       }
       request_conversations: {
         Row: {
@@ -1385,6 +1430,15 @@ export type Database = {
           old_price: number
           product_id: string
         }[]
+      }
+      report_market_price: {
+        Args: {
+          _price: number
+          _product_name: string
+          _product_url?: string
+          _seller_name?: string
+        }
+        Returns: string
       }
     }
     Enums: {

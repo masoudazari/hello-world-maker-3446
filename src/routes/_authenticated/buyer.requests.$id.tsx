@@ -9,8 +9,8 @@ import { Button } from "@/components/ui/button";
 import { RequestOfferChat } from "@/components/rfq/RequestOfferChat";
 import { supabase } from "@/integrations/supabase/client";
 import { useAccount } from "@/lib/auth";
-import { labelOf, QUALITY_LEVELS, TIMEFRAMES } from "@/lib/constants";
-import { faDate, faNumber, toman } from "@/lib/format";
+import { labelOf, paymentTermLabel, QUALITY_LEVELS, TIMEFRAMES } from "@/lib/constants";
+import { fa, faDate, faNumber, toman } from "@/lib/format";
 
 const TOP_OFFERS_COUNT = 6;
 const MEDALS = ["🥇", "🥈", "🥉"];
@@ -45,7 +45,7 @@ function BuyerRequestDetail() {
         supabase
           .from("supplier_offers")
           .select(
-            "id, unit_price, total_price, available_quantity, preparation_time, shipping_time, shipping_cost, payment_terms, description, status, created_at, suppliers(id, company_name, city, rating, verification_status, response_rate)",
+            "id, unit_price, total_price, available_quantity, preparation_time, shipping_time, shipping_cost, payment_terms, payment_term_code, payment_surcharge_percent, description, status, created_at, suppliers(id, company_name, city, rating, reviews_count, verification_status, response_rate)",
           )
           .eq("request_id", id)
           .order("unit_price", { ascending: true }),
@@ -55,7 +55,15 @@ function BuyerRequestDetail() {
   });
 
   const accept = useMutation({
-    mutationFn: async (offer: { id: string; supplier: string; total: number; quantity: number }) => {
+    mutationFn: async (offer: {
+      id: string;
+      supplier: string;
+      total: number;
+      quantity: number;
+      termCode: string | null;
+      surchargePercent: number;
+      surchargeAmount: number;
+    }) => {
       if (!account?.userId) throw new Error("ابتدا وارد شوید.");
       const { error: orderError } = await supabase.from("orders").insert({
         buyer_id: account.userId,
@@ -64,6 +72,9 @@ function BuyerRequestDetail() {
         offer_id: offer.id,
         quantity: offer.quantity,
         total_amount: offer.total,
+        payment_term_code: offer.termCode,
+        payment_surcharge_percent: offer.surchargePercent,
+        payment_surcharge_amount: offer.surchargeAmount,
         status: "pending_payment",
       });
       if (orderError) throw orderError;
@@ -166,7 +177,12 @@ function BuyerRequestDetail() {
                     <span>موجودی: {faNumber(Number(offer.available_quantity))} {request.unit}</span>
                     <span>آماده‌سازی: {offer.preparation_time || "—"}</span>
                     <span>ارسال: {offer.shipping_time || "—"}</span>
-                    <span>شرایط پرداخت: {offer.payment_terms || "—"}</span>
+                    <span>
+                      شرایط پرداخت: {paymentTermLabel(offer.payment_term_code) || offer.payment_terms || "—"}
+                      {Number(offer.payment_surcharge_percent) > 0
+                        ? ` (+${fa(Number(offer.payment_surcharge_percent))}٪)`
+                        : ""}
+                    </span>
                   </div>
                   {offer.description && <p className="mt-3 text-sm leading-7">{offer.description}</p>}
 
@@ -188,14 +204,19 @@ function BuyerRequestDetail() {
                         <Button
                           size="sm"
                           disabled={accept.isPending}
-                          onClick={() =>
+                          onClick={() => {
+                            const total = offer.total_price || offer.unit_price * Number(request.quantity);
+                            const percent = Number(offer.payment_surcharge_percent) || 0;
                             accept.mutate({
                               id: offer.id,
                               supplier: offer.suppliers!.id,
-                              total: offer.total_price || offer.unit_price * Number(request.quantity),
+                              total,
                               quantity: Number(request.quantity),
-                            })
-                          }
+                              termCode: offer.payment_term_code ?? null,
+                              surchargePercent: percent,
+                              surchargeAmount: percent > 0 ? Math.round(total - total / (1 + percent / 100)) : 0,
+                            });
+                          }}
                         >
                           پذیرش پیشنهاد
                         </Button>
