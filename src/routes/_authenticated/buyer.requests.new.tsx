@@ -131,10 +131,11 @@ function NewRequestPage() {
           : "درخواست شما ثبت شد و برای تأمین‌کنندگان ارسال می‌شود.",
       );
       void queryClient.invalidateQueries({ queryKey: ["buyer-requests"] });
-      if (batch_id) {
+      const firstId = ids[0];
+      if (batch_id || !firstId) {
         void navigate({ to: "/buyer/requests" });
       } else {
-        void navigate({ to: "/buyer/requests/$id", params: { id: ids[0] } });
+        void navigate({ to: "/buyer/requests/$id", params: { id: firstId } });
       }
     },
     onError: (error: Error) => toast.error(persianDbError(error, "ثبت درخواست ناموفق بود.")),
