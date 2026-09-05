@@ -13,7 +13,14 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useAccount } from "@/lib/auth";
-import { labelOf, PAYMENT_TERMS, QUALITY_LEVELS, TIMEFRAMES } from "@/lib/constants";
+import {
+  labelOf,
+  PAYMENT_TERM_OPTIONS,
+  paymentTermLabel,
+  QUALITY_LEVELS,
+  TIMEFRAMES,
+  withSurcharge,
+} from "@/lib/constants";
 import { faNumber, timeAgo, toman } from "@/lib/format";
 import { matchesQuery } from "@/lib/bilingual-search";
 
@@ -161,7 +168,8 @@ function OfferDialog({ request, supplierId }: { request: RequestRow; supplierId:
     preparation_time: "",
     shipping_time: "",
     shipping_cost: "",
-    payment_terms: "نقدی",
+    payment_term_code: "cash",
+    payment_surcharge_percent: "0",
     description: "",
   });
 
@@ -171,16 +179,19 @@ function OfferDialog({ request, supplierId }: { request: RequestRow; supplierId:
       const unitPrice = Number(form.unit_price);
       if (!unitPrice || unitPrice <= 0) throw new Error("قیمت واحد را وارد کنید.");
       const quantity = Number(form.available_quantity) || Number(request.quantity);
+      const surcharge = Number(form.payment_surcharge_percent) || 0;
       const { error } = await supabase.from("supplier_offers").insert({
         request_id: request.id,
         supplier_id: supplierId,
         unit_price: unitPrice,
-        total_price: unitPrice * quantity,
+        total_price: withSurcharge(unitPrice * quantity, surcharge),
         available_quantity: quantity,
         preparation_time: form.preparation_time || null,
         shipping_time: form.shipping_time || null,
         shipping_cost: form.shipping_cost ? Number(form.shipping_cost) : 0,
-        payment_terms: form.payment_terms,
+        payment_term_code: form.payment_term_code,
+        payment_surcharge_percent: surcharge,
+        payment_terms: paymentTermLabel(form.payment_term_code),
         description: form.description || null,
       });
       if (error) throw error;
@@ -195,7 +206,8 @@ function OfferDialog({ request, supplierId }: { request: RequestRow; supplierId:
     onError: (error: Error) => toast.error(error.message || "ثبت پیشنهاد ناموفق بود."),
   });
 
-  const total = (Number(form.unit_price) || 0) * (Number(form.available_quantity) || 0);
+  const baseTotal = (Number(form.unit_price) || 0) * (Number(form.available_quantity) || 0);
+  const total = withSurcharge(baseTotal, Number(form.payment_surcharge_percent) || 0);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -229,14 +241,35 @@ function OfferDialog({ request, supplierId }: { request: RequestRow; supplierId:
           </div>
           <div>
             <Label className="mb-2 block text-xs">شرایط پرداخت</Label>
-            <Select value={form.payment_terms} onValueChange={(v) => setForm({ ...form, payment_terms: v })}>
+            <Select
+              value={form.payment_term_code}
+              onValueChange={(v) => {
+                const option = PAYMENT_TERM_OPTIONS.find((o) => o.value === v);
+                setForm({
+                  ...form,
+                  payment_term_code: v,
+                  payment_surcharge_percent: String(option?.defaultSurcharge ?? 0),
+                });
+              }}
+            >
               <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
               <SelectContent>
-                {PAYMENT_TERMS.map((p) => (
+                {PAYMENT_TERM_OPTIONS.map((p) => (
                   <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
+          </div>
+          <div>
+            <Label className="mb-2 block text-xs">درصد اضافه‌بها برای این شرایط</Label>
+            <Input
+              type="number"
+              min={0}
+              max={100}
+              step="0.5"
+              value={form.payment_surcharge_percent}
+              onChange={(e) => setForm({ ...form, payment_surcharge_percent: e.target.value })}
+            />
           </div>
           <div className="sm:col-span-2">
             <Label className="mb-2 block text-xs">توضیحات</Label>
@@ -244,7 +277,10 @@ function OfferDialog({ request, supplierId }: { request: RequestRow; supplierId:
           </div>
         </div>
         <DialogFooter className="items-center justify-between gap-3 sm:justify-between">
-          <span className="text-sm text-muted-foreground">مبلغ کل: {toman(total)}</span>
+          <span className="text-sm text-muted-foreground">
+            مبلغ کل: {toman(total)}
+            {total !== baseTotal ? ` (پایه ${toman(baseTotal)} + اضافه‌بهای پرداخت)` : ""}
+          </span>
           <Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>
             {mutation.isPending ? "در حال ارسال…" : "ارسال پیشنهاد"}
           </Button>

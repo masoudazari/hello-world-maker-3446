@@ -11,6 +11,7 @@ import { brand } from "@/config/brand";
 import { accountQueryKey, homeForRole, type AppRole } from "@/lib/auth";
 import { normalizeIranianMobile } from "@/lib/phone";
 import { cn } from "@/lib/utils";
+import { persianAuthError } from "@/lib/error-messages";
 import { useQueryClient } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/login")({
@@ -59,7 +60,7 @@ function LoginPage() {
       const { error } = await supabase.auth.signInWithPassword({ phone: normalizedMobile, password });
       setLoading(false);
       if (error) {
-        toast.error("ورود ناموفق بود", { description: "شماره موبایل یا رمز عبور صحیح نیست." });
+        toast.error("ورود ناموفق بود", { description: persianAuthError(error, "شماره موبایل یا رمز عبور صحیح نیست.") });
         return;
       }
     } else {
@@ -67,7 +68,7 @@ function LoginPage() {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       setLoading(false);
       if (error) {
-        toast.error("ورود ناموفق بود", { description: "ایمیل یا رمز عبور صحیح نیست." });
+        toast.error("ورود ناموفق بود", { description: persianAuthError(error, "ایمیل یا رمز عبور صحیح نیست.") });
         return;
       }
     }

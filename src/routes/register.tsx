@@ -16,6 +16,7 @@ import { accountQueryKey, homeForRole } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { setupAccount } from "@/lib/account.functions";
 import { normalizeIranianMobile } from "@/lib/phone";
+import { persianAuthError } from "@/lib/error-messages";
 
 
 export const Route = createFileRoute("/register")({
@@ -66,7 +67,7 @@ function RegisterPage() {
     );
     if (signUpError) {
       setLoading(false);
-      toast.error("ثبت‌نام انجام نشد", { description: signUpError.message });
+      toast.error("ثبت‌نام انجام نشد", { description: persianAuthError(signUpError) });
       return;
     }
     try {
@@ -81,7 +82,7 @@ function RegisterPage() {
       });
     } catch (error) {
       setLoading(false);
-      toast.error("تکمیل حساب انجام نشد", { description: (error as Error).message });
+      toast.error("تکمیل حساب انجام نشد", { description: persianAuthError(error) });
       return;
     }
     setLoading(false);

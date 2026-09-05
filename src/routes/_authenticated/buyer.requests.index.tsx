@@ -86,7 +86,7 @@ function BuyerRequests() {
           {groups.batchGroups.map(({ batch_id, items }) => (
             <div key={batch_id} className="rounded-2xl border border-border bg-card p-4">
               <p className="mb-3 text-xs font-medium text-muted-foreground">
-                سفارش ترکیبی ({faNumber(items.length)} قلم) · {faDate(items[0].created_at)}
+                سفارش ترکیبی ({faNumber(items.length)} قلم) · {faDate(items[0]?.created_at ?? "")}
               </p>
               <div className="grid gap-2">
                 {items.map((r) => (

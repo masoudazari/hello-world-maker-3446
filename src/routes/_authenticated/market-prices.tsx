@@ -69,8 +69,8 @@ function MarketPrices() {
       const { error } = await supabase.rpc("report_market_price", {
         _product_name: query.trim(),
         _price: Number(reportForm.price),
-        _seller_name: reportForm.seller_name || null,
-        _product_url: reportForm.product_url || null,
+        _seller_name: reportForm.seller_name || undefined,
+        _product_url: reportForm.product_url || undefined,
       });
       if (error) throw error;
     },

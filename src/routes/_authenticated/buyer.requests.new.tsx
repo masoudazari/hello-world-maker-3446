@@ -16,6 +16,10 @@ import { parseNeed } from "@/lib/parse-need";
 import { cleanSearch } from "@/lib/search";
 import { getSearchVariants } from "@/lib/bilingual-search";
 import { toman } from "@/lib/format";
+import { CaptchaField, type CaptchaState } from "@/components/common/CaptchaField";
+import { verifyCaptcha } from "@/lib/captcha.functions";
+import { useServerFn } from "@tanstack/react-start";
+import { persianDbError } from "@/lib/error-messages";
 
 export const Route = createFileRoute("/_authenticated/buyer/requests/new")({
   validateSearch: (search: Record<string, unknown>): { need?: string | undefined } =>
@@ -50,6 +54,8 @@ function NewRequestPage() {
   const { need } = Route.useSearch();
   const parsed = parseNeed(need ?? "");
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const checkCaptcha = useServerFn(verifyCaptcha);
+  const [captcha, setCaptcha] = useState<CaptchaState>({ token: "", answer: "" });
 
   const [items, setItems] = useState<ItemRow[]>([
     newItem(parsed.productName, parsed.quantity ? String(parsed.quantity) : "", parsed.unit ?? "عدد"),
@@ -88,6 +94,14 @@ function NewRequestPage() {
       const validItems = items.filter((i) => i.product_name.trim() && Number(i.quantity) > 0);
       if (validItems.length === 0) throw new Error("حداقل یک قلم کالا با نام و مقدار معتبر وارد کنید.");
 
+      // Human check — together with the per-buyer limits enforced in the
+      // database this keeps bulk fake RFQs (and supplier-contact scraping)
+      // out of the fan-out pipeline.
+      if (!captcha.answer.trim()) throw new Error("لطفاً به سؤال تأیید انسان بودن پاسخ دهید.");
+      const check = await checkCaptcha({ data: { token: captcha.token, answer: captcha.answer.trim() } });
+      if (!check.ok) throw new Error("پاسخ تأیید انسان بودن درست نیست.");
+
+
       const batch_id = validItems.length > 1 ? crypto.randomUUID() : null;
 
       const rows = validItems.map((i) => ({
@@ -117,13 +131,14 @@ function NewRequestPage() {
           : "درخواست شما ثبت شد و برای تأمین‌کنندگان ارسال می‌شود.",
       );
       void queryClient.invalidateQueries({ queryKey: ["buyer-requests"] });
-      if (batch_id) {
+      const firstId = ids[0];
+      if (batch_id || !firstId) {
         void navigate({ to: "/buyer/requests" });
       } else {
-        void navigate({ to: "/buyer/requests/$id", params: { id: ids[0] } });
+        void navigate({ to: "/buyer/requests/$id", params: { id: firstId } });
       }
     },
-    onError: (error: Error) => toast.error(error.message || "ثبت درخواست ناموفق بود."),
+    onError: (error: Error) => toast.error(persianDbError(error, "ثبت درخواست ناموفق بود.")),
   });
 
   const set = (key: keyof typeof shared) => (value: string) => setShared((f) => ({ ...f, [key]: value }));
@@ -200,6 +215,13 @@ function NewRequestPage() {
               </Field>
             </>
           )}
+
+          <div className="md:col-span-2">
+            <CaptchaField value={captcha} onChange={setCaptcha} />
+            <p className="mt-2 text-xs text-muted-foreground">
+              برای جلوگیری از درخواست‌های ساختگی، حداکثر ۵ درخواست در ساعت و ۲۰ درخواست در شبانه‌روز قابل ثبت است.
+            </p>
+          </div>
 
           <div className="md:col-span-2">
             <Button type="submit" disabled={mutation.isPending}>
