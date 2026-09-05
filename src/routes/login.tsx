@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { brand } from "@/config/brand";
 import { accountQueryKey, homeForRole, type AppRole } from "@/lib/auth";
+import { normalizeIranianMobile } from "@/lib/phone";
+import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/login")({
@@ -26,7 +28,9 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [loginMethod, setLoginMethod] = useState<"phone" | "email">("phone");
   const [email, setEmail] = useState("");
+  const [mobile, setMobile] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -44,12 +48,28 @@ function LoginPage() {
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    if (error) {
-      toast.error("ورود ناموفق بود", { description: "ایمیل یا رمز عبور صحیح نیست." });
-      return;
+
+    if (loginMethod === "phone") {
+      const normalizedMobile = normalizeIranianMobile(mobile);
+      if (!normalizedMobile) {
+        toast.error("شماره موبایل نامعتبر است", { description: "شماره را به فرمت 09xxxxxxxxx وارد کنید." });
+        return;
+      }
+      setLoading(true);
+      const { error } = await supabase.auth.signInWithPassword({ phone: normalizedMobile, password });
+      setLoading(false);
+      if (error) {
+        toast.error("ورود ناموفق بود", { description: "شماره موبایل یا رمز عبور صحیح نیست." });
+        return;
+      }
+    } else {
+      setLoading(true);
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      setLoading(false);
+      if (error) {
+        toast.error("ورود ناموفق بود", { description: "ایمیل یا رمز عبور صحیح نیست." });
+        return;
+      }
     }
     toast.success("خوش آمدید!");
     await afterLogin();
@@ -79,11 +99,41 @@ function LoginPage() {
           برای مدیریت درخواست‌ها و پیشنهادها وارد شوید.
         </p>
 
+        <div className="mt-6 grid grid-cols-2 gap-2 rounded-xl bg-secondary p-1">
+          <button
+            type="button"
+            onClick={() => setLoginMethod("phone")}
+            className={cn(
+              "rounded-lg py-2 text-sm font-medium transition-colors",
+              loginMethod === "phone" ? "bg-background shadow-sm" : "text-muted-foreground",
+            )}
+          >
+            ورود با موبایل
+          </button>
+          <button
+            type="button"
+            onClick={() => setLoginMethod("email")}
+            className={cn(
+              "rounded-lg py-2 text-sm font-medium transition-colors",
+              loginMethod === "email" ? "bg-background shadow-sm" : "text-muted-foreground",
+            )}
+          >
+            ورود با ایمیل
+          </button>
+        </div>
+
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          <div>
-            <Label htmlFor="email" className="mb-2 block">ایمیل</Label>
-            <Input id="email" type="email" dir="ltr" required value={email} onChange={(e) => setEmail(e.target.value)} />
-          </div>
+          {loginMethod === "phone" ? (
+            <div>
+              <Label htmlFor="mobile" className="mb-2 block">شماره موبایل</Label>
+              <Input id="mobile" dir="ltr" placeholder="09xxxxxxxxx" required value={mobile} onChange={(e) => setMobile(e.target.value)} />
+            </div>
+          ) : (
+            <div>
+              <Label htmlFor="email" className="mb-2 block">ایمیل</Label>
+              <Input id="email" type="email" dir="ltr" required value={email} onChange={(e) => setEmail(e.target.value)} />
+            </div>
+          )}
           <div>
             <Label htmlFor="password" className="mb-2 block">رمز عبور</Label>
             <Input id="password" type="password" dir="ltr" required value={password} onChange={(e) => setPassword(e.target.value)} />

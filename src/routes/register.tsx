@@ -15,6 +15,7 @@ import { CITIES } from "@/lib/constants";
 import { accountQueryKey, homeForRole } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { setupAccount } from "@/lib/account.functions";
+import { normalizeIranianMobile } from "@/lib/phone";
 
 
 export const Route = createFileRoute("/register")({
@@ -39,18 +40,30 @@ function RegisterPage() {
   const [companyName, setCompanyName] = useState("");
   const [mobile, setMobile] = useState("");
   const [city, setCity] = useState("تهران");
+  const [signupMethod, setSignupMethod] = useState<"email" | "phone">("phone");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
+
+    const normalizedMobile = mobile.trim() ? normalizeIranianMobile(mobile) : null;
+    if (mobile.trim() && !normalizedMobile) {
+      toast.error("شماره موبایل نامعتبر است", { description: "شماره را به فرمت 09xxxxxxxxx وارد کنید." });
+      return;
+    }
+    if (signupMethod === "phone" && !normalizedMobile) {
+      toast.error("برای ثبت‌نام با موبایل، شماره موبایل الزامی است.");
+      return;
+    }
+
     setLoading(true);
-    const { error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { emailRedirectTo: window.location.origin },
-    });
+    const { error: signUpError } = await supabase.auth.signUp(
+      signupMethod === "phone"
+        ? { phone: normalizedMobile!, password }
+        : { email, password, options: { emailRedirectTo: window.location.origin } },
+    );
     if (signUpError) {
       setLoading(false);
       toast.error("ثبت‌نام انجام نشد", { description: signUpError.message });
@@ -60,7 +73,7 @@ function RegisterPage() {
       await setupAccountFn({
         data: {
           fullName,
-          ...(mobile ? { mobile } : {}),
+          ...(normalizedMobile ? { mobile: normalizedMobile } : {}),
           role,
           ...(companyName ? { companyName } : {}),
           city,
@@ -111,6 +124,29 @@ function RegisterPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+          <div className="grid grid-cols-2 gap-2 rounded-xl bg-secondary p-1">
+            <button
+              type="button"
+              onClick={() => setSignupMethod("phone")}
+              className={cn(
+                "rounded-lg py-2 text-sm font-medium transition-colors",
+                signupMethod === "phone" ? "bg-background shadow-sm" : "text-muted-foreground",
+              )}
+            >
+              ثبت‌نام با موبایل
+            </button>
+            <button
+              type="button"
+              onClick={() => setSignupMethod("email")}
+              className={cn(
+                "rounded-lg py-2 text-sm font-medium transition-colors",
+                signupMethod === "email" ? "bg-background shadow-sm" : "text-muted-foreground",
+              )}
+            >
+              ثبت‌نام با ایمیل
+            </button>
+          </div>
+
           <div>
             <Label htmlFor="fullName" className="mb-2 block">نام و نام خانوادگی</Label>
             <Input id="fullName" required value={fullName} onChange={(e) => setFullName(e.target.value)} />
@@ -123,8 +159,17 @@ function RegisterPage() {
           )}
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <Label htmlFor="mobile" className="mb-2 block">شماره موبایل</Label>
-              <Input id="mobile" dir="ltr" placeholder="09xxxxxxxxx" value={mobile} onChange={(e) => setMobile(e.target.value)} />
+              <Label htmlFor="mobile" className="mb-2 block">
+                شماره موبایل {signupMethod === "phone" && <span className="text-destructive">*</span>}
+              </Label>
+              <Input
+                id="mobile"
+                dir="ltr"
+                required={signupMethod === "phone"}
+                placeholder="09xxxxxxxxx"
+                value={mobile}
+                onChange={(e) => setMobile(e.target.value)}
+              />
             </div>
             <div>
               <Label className="mb-2 block">شهر</Label>
@@ -138,10 +183,12 @@ function RegisterPage() {
               </Select>
             </div>
           </div>
-          <div>
-            <Label htmlFor="email" className="mb-2 block">ایمیل</Label>
-            <Input id="email" type="email" dir="ltr" required value={email} onChange={(e) => setEmail(e.target.value)} />
-          </div>
+          {signupMethod === "email" && (
+            <div>
+              <Label htmlFor="email" className="mb-2 block">ایمیل</Label>
+              <Input id="email" type="email" dir="ltr" required value={email} onChange={(e) => setEmail(e.target.value)} />
+            </div>
+          )}
           <div>
             <Label htmlFor="password" className="mb-2 block">رمز عبور</Label>
             <Input
