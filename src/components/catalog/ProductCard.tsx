@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { BadgeCheck, MapPin, Package } from "lucide-react";
-import { fa, faNumber, toman } from "@/lib/format";
+import { faNumber, toman } from "@/lib/format";
 
 export type ProductCardData = {
   id: string;
@@ -55,11 +55,6 @@ export function ProductCard({ product }: { product: ProductCardData }) {
             <p className="flex items-center gap-1 text-xs text-muted-foreground">
               <MapPin className="size-3.5" />
               {product.city}
-            </p>
-          )}
-          {typeof product.stock === "number" && (
-            <p className="text-xs text-muted-foreground">
-              موجودی: {product.stock > 0 ? fa(faNumber(product.stock)) : "ناموجود"}
             </p>
           )}
         </div>

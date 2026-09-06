@@ -92,9 +92,6 @@ function ProductPage() {
                 </span>
               )}
               <span>واحد: {product.unit}</span>
-              <span>
-                موجودی: {product.stock && product.stock > 0 ? faNumber(product.stock) : "استعلامی"}
-              </span>
             </div>
 
             {product.description && (
