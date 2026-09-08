@@ -2,7 +2,8 @@ import { useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ImagePlus, Loader2, X } from "lucide-react";
+import { ImagePlus, Loader2, TrendingUp, X } from "lucide-react";
+import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { PanelShell } from "@/components/layout/PanelShell";
 import { EmptyState } from "@/components/common/EmptyState";
 import { StatusBadge } from "@/components/common/StatusBadge";
@@ -10,13 +11,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useAccount } from "@/lib/auth";
 import { getSearchVariants } from "@/lib/bilingual-search";
 import { CITIES, PAYMENT_TERM_OPTIONS, UNITS } from "@/lib/constants";
-import { faNumber, slugify, toman } from "@/lib/format";
+import { faDate, faNumber, slugify, toman } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/supplier/products")({
   head: () => ({
@@ -83,6 +84,7 @@ function SupplierProducts() {
                 <th className="p-3 font-medium">شهر</th>
                 <th className="p-3 font-medium">وضعیت</th>
                 <th className="p-3 font-medium">وضعیت بازار</th>
+                <th className="p-3 font-medium" />
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -117,6 +119,9 @@ function SupplierProducts() {
                         {stat.includes_mock_data ? "، شامل داده Mock" : ""})
                       </span>
                     )}
+                  </td>
+                  <td className="p-3">
+                    <PriceHistoryDialog productId={p.id} productName={p.name} />
                   </td>
                 </tr>
                 );
@@ -445,6 +450,64 @@ function ProductDialog({ supplierId }: { supplierId: string }) {
             {mutation.isPending ? "در حال ثبت…" : "ثبت محصول"}
           </Button>
         </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function PriceHistoryDialog({ productId, productName }: { productId: string; productName: string }) {
+  const [open, setOpen] = useState(false);
+
+  const { data: history = [], isLoading } = useQuery({
+    queryKey: ["product-price-history", productId],
+    enabled: open,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("product_price_history")
+        .select("id, old_price, new_price, change_percent, created_at")
+        .eq("product_id", productId)
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const chartData = history.map((h) => ({
+    date: faDate(h.created_at),
+    قیمت: h.new_price,
+  }));
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="sm">
+          <TrendingUp className="ml-2 h-3.5 w-3.5" /> نمودار قیمت
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>تاریخچه قیمت «{productName}»</DialogTitle>
+        </DialogHeader>
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">در حال بارگذاری…</p>
+        ) : chartData.length < 2 ? (
+          <EmptyState
+            title="هنوز تاریخچه‌ای ثبت نشده"
+            description="با هر تغییر قیمت این محصول، یک نقطه به این نمودار اضافه می‌شود."
+          />
+        ) : (
+          <div className="h-64 w-full" dir="ltr">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" fontSize={11} />
+                <YAxis fontSize={11} tickFormatter={(v) => faNumber(v)} width={70} />
+                <Tooltip formatter={(v: number) => toman(v)} />
+                <Line type="monotone" dataKey="قیمت" stroke="hsl(var(--primary))" strokeWidth={2} dot />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

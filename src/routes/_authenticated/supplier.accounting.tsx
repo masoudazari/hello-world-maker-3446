@@ -2,7 +2,8 @@ import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { CheckCircle2, CircleDollarSign } from "lucide-react";
+import * as XLSX from "xlsx";
+import { CheckCircle2, CircleDollarSign, Download } from "lucide-react";
 import { PanelShell } from "@/components/layout/PanelShell";
 import { EmptyState } from "@/components/common/EmptyState";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,19 @@ function startOfDay(d: Date) {
   const x = new Date(d);
   x.setHours(0, 0, 0, 0);
   return x;
+}
+
+function downloadWorkbook(workbook: XLSX.WorkBook, filename: string) {
+  const wbout = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+  const blob = new Blob([wbout], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 function SupplierAccounting() {
@@ -124,6 +138,31 @@ function SupplierAccounting() {
       });
   }, [orders]);
 
+  function exportSalesToExcel() {
+    if (filteredSales.length === 0) {
+      toast.error("داده‌ای برای خروجی گرفتن وجود ندارد.");
+      return;
+    }
+    try {
+      const sheetData = filteredSales.map((o) => ({
+        "شماره فاکتور": o.invoice_number,
+        تاریخ: faDate(o.created_at),
+        مشتری: o.buyer_name_snapshot ?? "",
+        "شرایط پرداخت": paymentTermLabel(o.payment_term_code),
+        مبلغ: o.total_amount,
+        "وضعیت پرداخت": o.is_paid ? "پرداخت‌شده" : "معوق",
+      }));
+      const worksheet = XLSX.utils.json_to_sheet(sheetData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "ریز فروش");
+      downloadWorkbook(workbook, "ریز-فروش-حسابداری.xlsx");
+      toast.success("فایل اکسل آماده شد.");
+    } catch (err) {
+      console.error(err);
+      toast.error("ساخت فایل اکسل ناموفق بود.");
+    }
+  }
+
   return (
     <PanelShell role="supplier" title="حسابداری" subtitle="خلاصه فروش، ریز فاکتورها و تسویه‌حساب مشتریان">
       {!supplierId ? (
@@ -198,6 +237,9 @@ function SupplierAccounting() {
                         ))}
                       </SelectContent>
                     </Select>
+                    <Button variant="outline" size="sm" onClick={exportSalesToExcel} className="mr-auto">
+                      <Download className="ml-2 h-4 w-4" /> خروجی Excel
+                    </Button>
                   </div>
                   <div className="rounded-2xl border border-border bg-card">
                     <Table>

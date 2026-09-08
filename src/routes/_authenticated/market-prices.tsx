@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ExternalLink, Search } from "lucide-react";
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { PanelShell } from "@/components/layout/PanelShell";
 import { EmptyState } from "@/components/common/EmptyState";
 import { Button } from "@/components/ui/button";
@@ -263,12 +264,25 @@ function MarketPrices() {
           ) : (
             <>
               {siteProducts.length > 1 && (
-                <p className="mb-3 text-xs text-muted-foreground">
-                  از بین {siteProducts.length} فروشنده · کمترین: {toman(Math.min(...siteProducts.map((p) => p.base_price)))} ·
-                  میانگین:{" "}
-                  {toman(Math.round(siteProducts.reduce((s, p) => s + p.base_price, 0) / siteProducts.length))} · بیشترین:{" "}
-                  {toman(Math.max(...siteProducts.map((p) => p.base_price)))}
-                </p>
+                <>
+                  <p className="mb-3 text-xs text-muted-foreground">
+                    از بین {siteProducts.length} فروشنده · کمترین: {toman(Math.min(...siteProducts.map((p) => p.base_price)))} ·
+                    میانگین:{" "}
+                    {toman(Math.round(siteProducts.reduce((s, p) => s + p.base_price, 0) / siteProducts.length))} · بیشترین:{" "}
+                    {toman(Math.max(...siteProducts.map((p) => p.base_price)))}
+                  </p>
+                  <div className="mb-4 h-56 w-full rounded-2xl border border-border bg-card p-3" dir="ltr">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={siteProducts.map((p) => ({ name: p.suppliers?.company_name ?? "فروشنده", قیمت: p.base_price }))}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" fontSize={10} interval={0} angle={-20} textAnchor="end" height={50} />
+                        <YAxis fontSize={11} width={60} />
+                        <Tooltip formatter={(v: number) => toman(v)} />
+                        <Bar dataKey="قیمت" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </>
               )}
               <div className="grid gap-3">
                 {siteProducts.map((p) => (
