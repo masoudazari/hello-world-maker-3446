@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import {
   Bell,
   Boxes,
+  Calculator,
   ClipboardList,
   FileText,
   LayoutDashboard,
@@ -40,6 +41,7 @@ const NAV: Record<AppRole, NavItem[]> = {
     { to: "/supplier/requests", label: "فرصت‌های فروش", icon: ClipboardList },
     { to: "/supplier/offers", label: "پیشنهادهای من", icon: FileText },
     { to: "/supplier/orders", label: "سفارش‌ها", icon: ShoppingBag },
+    { to: "/supplier/accounting", label: "حسابداری", icon: Calculator },
     { to: "/supplier/products", label: "محصولات", icon: Package },
     { to: "/supplier/bulk-pricing", label: "مدیریت قیمت گروهی", icon: Tags },
     { to: "/market-prices", label: "مقایسه قیمت بازار", icon: TrendingUp },

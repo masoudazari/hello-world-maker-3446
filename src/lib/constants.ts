@@ -113,17 +113,25 @@ export const PAYMENT_TERMS: Option[] = [
  * comparable and filterable, and each one carries a supplier-defined
  * surcharge percentage (deferred payment costs the supplier money).
  */
-export type PaymentTermOption = Option & { defaultSurcharge: number };
+export type PaymentTermOption = Option & { defaultSurcharge: number; days: number };
 
 export const PAYMENT_TERM_OPTIONS: PaymentTermOption[] = [
-  { value: "cash", label: "نقدی", defaultSurcharge: 0 },
-  { value: "prepay_50", label: "۵۰٪ پیش‌پرداخت", defaultSurcharge: 0 },
-  { value: "net_7", label: "۷ روزه", defaultSurcharge: 2 },
-  { value: "net_30", label: "۳۰ روزه", defaultSurcharge: 10 },
-  { value: "net_60", label: "۶۰ روزه", defaultSurcharge: 18 },
-  { value: "check_1m", label: "چک ۱ ماهه", defaultSurcharge: 8 },
-  { value: "check_3m", label: "چک ۳ ماهه", defaultSurcharge: 20 },
+  { value: "cash", label: "نقدی", defaultSurcharge: 0, days: 0 },
+  { value: "prepay_50", label: "۵۰٪ پیش‌پرداخت", defaultSurcharge: 0, days: 0 },
+  { value: "net_7", label: "۷ روزه", defaultSurcharge: 2, days: 7 },
+  { value: "net_30", label: "۳۰ روزه", defaultSurcharge: 10, days: 30 },
+  { value: "net_60", label: "۶۰ روزه", defaultSurcharge: 18, days: 60 },
+  { value: "check_1m", label: "چک ۱ ماهه", defaultSurcharge: 8, days: 30 },
+  { value: "check_3m", label: "چک ۳ ماهه", defaultSurcharge: 20, days: 90 },
 ];
+
+export function paymentTermDueDate(createdAt: string, code: string | null | undefined): Date | null {
+  const term = PAYMENT_TERM_OPTIONS.find((o) => o.value === code);
+  if (!term || term.days === 0) return null;
+  const due = new Date(createdAt);
+  due.setDate(due.getDate() + term.days);
+  return due;
+}
 
 export function paymentTermLabel(code: string | null | undefined): string {
   if (!code) return "—";
