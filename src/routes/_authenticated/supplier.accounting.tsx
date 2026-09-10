@@ -3,9 +3,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
-import { CheckCircle2, CircleDollarSign, Download } from "lucide-react";
+import { CheckCircle2, CircleDollarSign, Download, Printer } from "lucide-react";
+import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { PanelShell } from "@/components/layout/PanelShell";
 import { EmptyState } from "@/components/common/EmptyState";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -127,6 +129,36 @@ function SupplierAccounting() {
     });
   }, [orders, search, paymentFilter, termFilter]);
 
+  const [printOrder, setPrintOrder] = useState<OrderRow | null>(null);
+
+  const salesTrend = useMemo(() => {
+    const days = 14;
+    const buckets: { date: string; فروش: number }[] = [];
+    for (let i = days - 1; i >= 0; i--) {
+      const day = startOfDay(new Date());
+      day.setDate(day.getDate() - i);
+      const nextDay = new Date(day);
+      nextDay.setDate(nextDay.getDate() + 1);
+      const total = orders
+        .filter((o) => {
+          const d = new Date(o.created_at);
+          return d >= day && d < nextDay;
+        })
+        .reduce((s, o) => s + o.total_amount, 0);
+      buckets.push({ date: faDate(day.toISOString()), فروش: total });
+    }
+    return buckets;
+  }, [orders]);
+
+  const byPaymentTerm = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const o of orders) {
+      const key = paymentTermLabel(o.payment_term_code) || "نامشخص";
+      map.set(key, (map.get(key) ?? 0) + o.total_amount);
+    }
+    return Array.from(map.entries()).map(([name, مبلغ]) => ({ name, مبلغ }));
+  }, [orders]);
+
   const settlementRows = useMemo(() => {
     return orders
       .filter((o) => !o.is_paid)
@@ -211,6 +243,39 @@ function SupplierAccounting() {
                 </div>
               )}
 
+              {tab === "summary" && (
+                <div className="mt-6 grid gap-4 lg:grid-cols-2">
+                  <div className="rounded-2xl border border-border bg-card p-4">
+                    <p className="mb-3 text-sm font-bold">مرور فروش (۱۴ روز اخیر)</p>
+                    <div className="h-56 w-full" dir="ltr">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={salesTrend}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="date" fontSize={10} />
+                          <YAxis fontSize={11} width={60} />
+                          <Tooltip formatter={(v: number) => toman(v)} />
+                          <Line type="monotone" dataKey="فروش" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                  <div className="rounded-2xl border border-border bg-card p-4">
+                    <p className="mb-3 text-sm font-bold">فروش به تفکیک شرایط پرداخت</p>
+                    <div className="h-56 w-full" dir="ltr">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={byPaymentTerm}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="name" fontSize={10} />
+                          <YAxis fontSize={11} width={60} />
+                          <Tooltip formatter={(v: number) => toman(v)} />
+                          <Bar dataKey="مبلغ" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {tab === "sales" && (
                 <>
                   <div className="mb-4 flex flex-wrap items-center gap-3">
@@ -251,6 +316,7 @@ function SupplierAccounting() {
                           <TableHead>شرایط پرداخت</TableHead>
                           <TableHead>مبلغ</TableHead>
                           <TableHead>وضعیت</TableHead>
+                          <TableHead />
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -265,6 +331,11 @@ function SupplierAccounting() {
                               <span className={o.is_paid ? "text-emerald-600" : "text-amber-600"}>
                                 {o.is_paid ? "پرداخت‌شده" : "معوق"}
                               </span>
+                            </TableCell>
+                            <TableCell>
+                              <Button variant="ghost" size="icon" onClick={() => setPrintOrder(o)}>
+                                <Printer className="h-4 w-4" />
+                              </Button>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -327,6 +398,28 @@ function SupplierAccounting() {
           )}
         </>
       )}
+
+      <Dialog open={Boolean(printOrder)} onOpenChange={(v) => !v && setPrintOrder(null)}>
+        <DialogContent className="max-w-sm print:max-w-full print:shadow-none">
+          <DialogHeader>
+            <DialogTitle>فاکتور #{printOrder ? faNumber(printOrder.invoice_number) : ""}</DialogTitle>
+          </DialogHeader>
+          {printOrder && (
+            <div className="space-y-2 text-sm" id="invoice-print-area">
+              <div className="flex justify-between"><span className="text-muted-foreground">تاریخ</span><span>{faDate(printOrder.created_at)}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">مشتری</span><span>{printOrder.buyer_name_snapshot ?? "—"}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">شرایط پرداخت</span><span>{paymentTermLabel(printOrder.payment_term_code)}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">وضعیت</span><span>{printOrder.is_paid ? "پرداخت‌شده" : "معوق"}</span></div>
+              <div className="mt-3 flex justify-between border-t border-border pt-3 text-base font-bold">
+                <span>مبلغ کل</span><span>{toman(printOrder.total_amount)}</span>
+              </div>
+              <Button className="mt-4 w-full print:hidden" onClick={() => window.print()}>
+                <Printer className="ml-2 h-4 w-4" /> چاپ
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </PanelShell>
   );
 }
